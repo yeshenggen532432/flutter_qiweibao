@@ -13,6 +13,7 @@ import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
+import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
@@ -1267,11 +1268,13 @@ class WareEditState extends State<WareEdit> {
 //    "supType": 0,
     };
 
+    LoadingDialogUtil.show();
     var response = await Dio().post(
         UrlUtil.WARE_SAVE,
         data: data,
         options: Options( headers: {"token": ContainsUtil.token} )
         );
+    LoadingDialogUtil.dismiss();
     logger.d(response);
   }
 

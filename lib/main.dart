@@ -7,7 +7,8 @@ import 'package:flutterqiweibao/ui/ware_edit.dart';
 import 'dart:ui' as ui;
 
 void main() {
-  runApp( MyApp(param: "{\"route\":\"ware_edit\"}"));
+  runApp( MyApp(param: ui.window.defaultRouteName));
+//  runApp( MyApp(param: "{\"route\":\"ware_edit\", \"type\":false}"));
   configLoading();
 }
 
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     print(param);
     RouteBean routeBean = RouteBean.fromJson(json.decode(param.toString()));
+    print("路由："+routeBean.route.toString());
     return MaterialApp(
       title: '企微宝',
       theme: ThemeData(
@@ -42,8 +44,8 @@ class MyApp extends StatelessWidget {
       ),
       initialRoute: routeBean.route,
       routes: {
-//        "ware_edit": (context)=> WareEdit(type: true, wareId: 2293),
-        "ware_edit": (context)=> WareEdit(type: false),
+        "ware_edit": (context)=> WareEdit(type: routeBean.type!, wareId: routeBean.wareId),
+//        "ware_edit": (context)=> WareEdit(type: false),
       },
       builder: EasyLoading.init(),
 //      home: const WareEdit(),
