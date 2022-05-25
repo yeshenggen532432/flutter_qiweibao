@@ -1,10 +1,13 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'dart:ui' as ui;
+import 'package:flutterqiweibao/model/route.dart';
 import 'package:flutterqiweibao/ui/ware_edit.dart';
+import 'dart:ui' as ui;
 
 void main() {
-  runApp( MyApp(param: ui.window.defaultRouteName,));
+  runApp( MyApp(param: ui.window.defaultRouteName));
   configLoading();
 }
 
@@ -30,12 +33,14 @@ class MyApp extends StatelessWidget {
   MyApp({Key? key, required this.param}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    print(param);
+    RouteBean routeBean = RouteBean.fromJson(json.decode(param.toString()));
     return MaterialApp(
       title: '企微宝',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      initialRoute: "ware_edit",
+      initialRoute: routeBean.route,
       routes: {
 //        "ware_edit": (context)=> WareEdit(type: true, wareId: 2293),
         "ware_edit": (context)=> WareEdit(type: false),
