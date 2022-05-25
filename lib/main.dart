@@ -7,7 +7,7 @@ import 'package:flutterqiweibao/ui/ware_edit.dart';
 import 'dart:ui' as ui;
 
 void main() {
-  runApp( MyApp(param: ui.window.defaultRouteName));
+  runApp( MyApp(param: "{\"route\":\"ware_edit\"}"));
   configLoading();
 }
 
