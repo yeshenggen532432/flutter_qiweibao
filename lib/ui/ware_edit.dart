@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutterqiweibao/model/base_result.dart';
 import 'package:flutterqiweibao/model/pic_bean.dart';
@@ -13,7 +14,6 @@ import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
-import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
@@ -33,11 +33,29 @@ class WareEdit extends StatefulWidget {
 }
 
 class WareEditState extends State<WareEdit> {
+  static MethodChannel _methodChannel = MethodChannel('com.cc.flutter/native');
 
   @override
   void initState() {
+    _methodChannel.setMethodCallHandler(_methodChannelHandler);
+    // 接受Native发送过来的消息
     super.initState();
     queryDetail();
+  }
+
+  /// 原生 调用 Flutter的结果回调
+  Future<String> _methodChannelHandler(MethodCall call) async{
+    String result = "";
+    print("---------------_methodChannelHandler------------------------ method = ${call.method}");
+    switch(call.method){
+      case "callFlutter":
+        setState(() {
+          _isTypeText = call.arguments.toString();
+        });
+        result = "Flutter 收到 Android发来的消息";
+        break;
+    }
+    return result;
   }
 
   Future<void> queryDetail() async {
@@ -100,6 +118,8 @@ class WareEditState extends State<WareEdit> {
 
   @override
   Widget build(BuildContext context) {
+
+
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
@@ -1205,77 +1225,78 @@ class WareEditState extends State<WareEdit> {
   }
 
   Future<void> _save() async {
-    String wareName = _wareNameController.text;
-    String maxUnit = _maxUnitController.text;
-    String minUnit = _minUnitController.text;
-    String maxWareGg = _maxWareGgUnitController.text;
-    String minWareGg = _minWareGgUnitController.text;
-    String maxBarCode = _maxBarCodeController.text;
-    String minBarCode = _minBarCodeController.text;
-    String sUnit = _sUnitController.text;
-    String maxSort = _maxSortController.text;
-    String minSort = _minSortController.text;
-    String wareTypeSort = _wareTypeSortController.text;
-    String maxLsPrice = _maxLsPriceController.text;
-    String minLsPrice = _minLsPriceController.text;
-    String maxInPrice = _maxInPriceController.text;
-    String minInPrice = _minInPriceController.text;
-    String maxPfPrice = _maxPfPriceController.text;
-    String minPfPrice = _minPfPriceController.text;
-    String innerAccPriceDefault = _innerAccPriceDefaultController.text;
-    String lowestSalePrice = _lowestSalePriceController.text;
-    String wareFeatures = _wareFeaturesController.text;
-    String quality = _qualityController.text;
-    String qualityWarn = _qualityWarnController.text;
-    String warnQty = _warnQtyController.text;
-
-    var data = {
-      "wareId": _wareId,
-      "barCodeTip": true,
-      "businessType": _businessType,
-      "waretype": _wareType,
-      "wareNm": wareName,
-      "wareDw": maxUnit,
-      "minUnit": minUnit,
-      "wareGg": maxWareGg,
-      "minWareGg": minWareGg,
-      "packBarCode": maxBarCode,
-      "beBarCode": minBarCode,
-      "bUnit": "1",
-      "sUnit": sUnit,
-      "sortCode": _maxLetterSort,
-      "sort": maxSort,
-      "minSortCode": _minLetterSort,
-      "minSort": minSort,
-      "waretypeSort": wareTypeSort,
-      "lsPrice": maxLsPrice,
-      "minLsPrice": minLsPrice,
-      "inPrice": maxInPrice,
-      "minInPrice": minInPrice,
-      "wareDj": maxPfPrice,
-      "sunitPrice": minPfPrice,
-      "innerAccPriceDefault": innerAccPriceDefault,
-      "lowestSalePrice": lowestSalePrice,
-      "wareFeatures": wareFeatures,
-      "qualityDays": quality,
-      "qualityUnit": _qualityValue,
-      "qualityAlert": qualityWarn,
-      "warnQty": warnQty,
-      "warePicList": _picList,
-//  "brandId":,
-//    "supId": 1032,
-//    "supName": "上海梅林泰康食品有限公司制造",
-//    "supType": 0,
-    };
-
-    LoadingDialogUtil.show();
-    var response = await Dio().post(
-        UrlUtil.WARE_SAVE,
-        data: data,
-        options: Options( headers: {"token": ContainsUtil.token} )
-        );
-    LoadingDialogUtil.dismiss();
-    logger.d(response);
+    _methodChannel.invokeMethod("envType", "kkjj");
+//    String wareName = _wareNameController.text;
+//    String maxUnit = _maxUnitController.text;
+//    String minUnit = _minUnitController.text;
+//    String maxWareGg = _maxWareGgUnitController.text;
+//    String minWareGg = _minWareGgUnitController.text;
+//    String maxBarCode = _maxBarCodeController.text;
+//    String minBarCode = _minBarCodeController.text;
+//    String sUnit = _sUnitController.text;
+//    String maxSort = _maxSortController.text;
+//    String minSort = _minSortController.text;
+//    String wareTypeSort = _wareTypeSortController.text;
+//    String maxLsPrice = _maxLsPriceController.text;
+//    String minLsPrice = _minLsPriceController.text;
+//    String maxInPrice = _maxInPriceController.text;
+//    String minInPrice = _minInPriceController.text;
+//    String maxPfPrice = _maxPfPriceController.text;
+//    String minPfPrice = _minPfPriceController.text;
+//    String innerAccPriceDefault = _innerAccPriceDefaultController.text;
+//    String lowestSalePrice = _lowestSalePriceController.text;
+//    String wareFeatures = _wareFeaturesController.text;
+//    String quality = _qualityController.text;
+//    String qualityWarn = _qualityWarnController.text;
+//    String warnQty = _warnQtyController.text;
+//
+//    var data = {
+//      "wareId": _wareId,
+//      "barCodeTip": true,
+//      "businessType": _businessType,
+//      "waretype": _wareType,
+//      "wareNm": wareName,
+//      "wareDw": maxUnit,
+//      "minUnit": minUnit,
+//      "wareGg": maxWareGg,
+//      "minWareGg": minWareGg,
+//      "packBarCode": maxBarCode,
+//      "beBarCode": minBarCode,
+//      "bUnit": "1",
+//      "sUnit": sUnit,
+//      "sortCode": _maxLetterSort,
+//      "sort": maxSort,
+//      "minSortCode": _minLetterSort,
+//      "minSort": minSort,
+//      "waretypeSort": wareTypeSort,
+//      "lsPrice": maxLsPrice,
+//      "minLsPrice": minLsPrice,
+//      "inPrice": maxInPrice,
+//      "minInPrice": minInPrice,
+//      "wareDj": maxPfPrice,
+//      "sunitPrice": minPfPrice,
+//      "innerAccPriceDefault": innerAccPriceDefault,
+//      "lowestSalePrice": lowestSalePrice,
+//      "wareFeatures": wareFeatures,
+//      "qualityDays": quality,
+//      "qualityUnit": _qualityValue,
+//      "qualityAlert": qualityWarn,
+//      "warnQty": warnQty,
+//      "warePicList": _picList,
+////  "brandId":,
+////    "supId": 1032,
+////    "supName": "上海梅林泰康食品有限公司制造",
+////    "supType": 0,
+//    };
+//
+//    LoadingDialogUtil.show();
+//    var response = await Dio().post(
+//        UrlUtil.WARE_SAVE,
+//        data: data,
+//        options: Options( headers: {"token": ContainsUtil.token} )
+//        );
+//    LoadingDialogUtil.dismiss();
+//    logger.d(response);
   }
 
 
