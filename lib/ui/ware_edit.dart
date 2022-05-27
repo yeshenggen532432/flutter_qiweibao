@@ -7,6 +7,7 @@ import 'package:flutterqiweibao/model/base_result.dart';
 import 'package:flutterqiweibao/model/pic_bean.dart';
 import 'package:flutterqiweibao/model/pic_result.dart';
 import 'package:flutterqiweibao/model/ware/ware.dart';
+import 'package:flutterqiweibao/model/ware/ware_intent%20.dart';
 import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/tree/dialog/tree_ware_type_dialog.dart';
@@ -14,6 +15,7 @@ import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
+import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
@@ -22,9 +24,7 @@ import 'package:flutterqiweibao/utils/ware_is_type_util.dart';
 import 'package:image_picker/image_picker.dart';
 
 class WareEdit extends StatefulWidget {
-  bool type;
-  int? wareId;
-  WareEdit({Key? key, required this.type, this.wareId}) : super(key: key);
+  const WareEdit({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -33,14 +33,29 @@ class WareEdit extends StatefulWidget {
 }
 
 class WareEditState extends State<WareEdit> {
+  bool add = true;
+  int? wareId;
   static MethodChannel _methodChannel = MethodChannel('com.cc.flutter/native');
 
   @override
   void initState() {
-    _methodChannel.setMethodCallHandler(_methodChannelHandler);
-    // 接受Native发送过来的消息
     super.initState();
-    queryDetail();
+    _methodChannel.setMethodCallHandler(_methodChannelHandler);
+    getWareIntent();
+  }
+
+  getWareIntent() async{
+    var map = await _methodChannel.invokeMethod("WareIntent");
+    print("------------------------getWareIntent-----------------------:"+map.toString());
+//    Map<String, dynamic> map = {"add": false, "wareId": 123};
+    setState(() {
+      WareIntent wareIntent = WareIntent.fromJson(json.decode(map));
+      add = wareIntent.add!;
+      wareId = wareIntent.wareId;
+      if(!add){
+        queryDetail();
+      }
+    });
   }
 
   /// 原生 调用 Flutter的结果回调
@@ -59,9 +74,8 @@ class WareEditState extends State<WareEdit> {
   }
 
   Future<void> queryDetail() async {
-    if(widget.type){
       EasyLoading.show(status: "加载中...");
-      Map<String, dynamic>? params = {"wareId":widget.wareId};
+      Map<String, dynamic>? params = {"wareId":wareId};
       var response = await Dio().get(
           UrlUtil.ware_detail,
           queryParameters: params,
@@ -73,7 +87,6 @@ class WareEditState extends State<WareEdit> {
       if(result.state != null && result.state == true){
         doUI(result.sysWare!);
       }
-    }
   }
 
   void doUI(Ware ware){
@@ -111,14 +124,11 @@ class WareEditState extends State<WareEdit> {
       _quality = QualityUnitUtil.getText(_qualityValue);
       _warnQtyController.text = ware.warnQty != null? ware.warnQty.toString(): "";
       _picList.addAll(ware.warePicList!);
-
-
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
 
     return Scaffold(
       appBar: AppBar(
@@ -128,7 +138,7 @@ class WareEditState extends State<WareEdit> {
               Navigator.pop(context);
             },
           ),
-          title: const Text("新建商品")),
+          title: Text(add?"新建商品": "修改商品")),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.only(left: 10, right: 10),
         child: RaisedButton(
@@ -195,7 +205,7 @@ class WareEditState extends State<WareEdit> {
                   Radio(
                       value: "0",
                       groupValue: _businessType,
-                      onChanged: (value) => widget.type? null: _changeRadioValue(value)),
+                      onChanged: (value) => !add? null: _changeRadioValue(value)),
                   Text("实物商品",
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
@@ -203,7 +213,7 @@ class WareEditState extends State<WareEdit> {
                   Radio(
                       value: "1",
                       groupValue: _businessType,
-                      onChanged: (value) => widget.type? null: _changeRadioValue(value)),
+                      onChanged: (value) => !add? null: _changeRadioValue(value)),
                   Text("服务商品",
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
@@ -1225,78 +1235,84 @@ class WareEditState extends State<WareEdit> {
   }
 
   Future<void> _save() async {
-    _methodChannel.invokeMethod("envType", "kkjj");
-//    String wareName = _wareNameController.text;
-//    String maxUnit = _maxUnitController.text;
-//    String minUnit = _minUnitController.text;
-//    String maxWareGg = _maxWareGgUnitController.text;
-//    String minWareGg = _minWareGgUnitController.text;
-//    String maxBarCode = _maxBarCodeController.text;
-//    String minBarCode = _minBarCodeController.text;
-//    String sUnit = _sUnitController.text;
-//    String maxSort = _maxSortController.text;
-//    String minSort = _minSortController.text;
-//    String wareTypeSort = _wareTypeSortController.text;
-//    String maxLsPrice = _maxLsPriceController.text;
-//    String minLsPrice = _minLsPriceController.text;
-//    String maxInPrice = _maxInPriceController.text;
-//    String minInPrice = _minInPriceController.text;
-//    String maxPfPrice = _maxPfPriceController.text;
-//    String minPfPrice = _minPfPriceController.text;
-//    String innerAccPriceDefault = _innerAccPriceDefaultController.text;
-//    String lowestSalePrice = _lowestSalePriceController.text;
-//    String wareFeatures = _wareFeaturesController.text;
-//    String quality = _qualityController.text;
-//    String qualityWarn = _qualityWarnController.text;
-//    String warnQty = _warnQtyController.text;
-//
-//    var data = {
-//      "wareId": _wareId,
-//      "barCodeTip": true,
-//      "businessType": _businessType,
-//      "waretype": _wareType,
-//      "wareNm": wareName,
-//      "wareDw": maxUnit,
-//      "minUnit": minUnit,
-//      "wareGg": maxWareGg,
-//      "minWareGg": minWareGg,
-//      "packBarCode": maxBarCode,
-//      "beBarCode": minBarCode,
-//      "bUnit": "1",
-//      "sUnit": sUnit,
-//      "sortCode": _maxLetterSort,
-//      "sort": maxSort,
-//      "minSortCode": _minLetterSort,
-//      "minSort": minSort,
-//      "waretypeSort": wareTypeSort,
-//      "lsPrice": maxLsPrice,
-//      "minLsPrice": minLsPrice,
-//      "inPrice": maxInPrice,
-//      "minInPrice": minInPrice,
-//      "wareDj": maxPfPrice,
-//      "sunitPrice": minPfPrice,
-//      "innerAccPriceDefault": innerAccPriceDefault,
-//      "lowestSalePrice": lowestSalePrice,
-//      "wareFeatures": wareFeatures,
-//      "qualityDays": quality,
-//      "qualityUnit": _qualityValue,
-//      "qualityAlert": qualityWarn,
-//      "warnQty": warnQty,
-//      "warePicList": _picList,
-////  "brandId":,
-////    "supId": 1032,
-////    "supName": "上海梅林泰康食品有限公司制造",
-////    "supType": 0,
-//    };
-//
-//    LoadingDialogUtil.show();
-//    var response = await Dio().post(
-//        UrlUtil.WARE_SAVE,
-//        data: data,
-//        options: Options( headers: {"token": ContainsUtil.token} )
-//        );
-//    LoadingDialogUtil.dismiss();
-//    logger.d(response);
+    String wareName = _wareNameController.text;
+    String maxUnit = _maxUnitController.text;
+    String minUnit = _minUnitController.text;
+    String maxWareGg = _maxWareGgUnitController.text;
+    String minWareGg = _minWareGgUnitController.text;
+    String maxBarCode = _maxBarCodeController.text;
+    String minBarCode = _minBarCodeController.text;
+    String sUnit = _sUnitController.text;
+    String maxSort = _maxSortController.text;
+    String minSort = _minSortController.text;
+    String wareTypeSort = _wareTypeSortController.text;
+    String maxLsPrice = _maxLsPriceController.text;
+    String minLsPrice = _minLsPriceController.text;
+    String maxInPrice = _maxInPriceController.text;
+    String minInPrice = _minInPriceController.text;
+    String maxPfPrice = _maxPfPriceController.text;
+    String minPfPrice = _minPfPriceController.text;
+    String innerAccPriceDefault = _innerAccPriceDefaultController.text;
+    String lowestSalePrice = _lowestSalePriceController.text;
+    String wareFeatures = _wareFeaturesController.text;
+    String quality = _qualityController.text;
+    String qualityWarn = _qualityWarnController.text;
+    String warnQty = _warnQtyController.text;
+
+    var data = {
+      "wareId": _wareId,
+      "barCodeTip": true,
+      "businessType": _businessType,
+      "waretype": _wareType,
+      "wareNm": wareName,
+      "wareDw": maxUnit,
+      "minUnit": minUnit,
+      "wareGg": maxWareGg,
+      "minWareGg": minWareGg,
+      "packBarCode": maxBarCode,
+      "beBarCode": minBarCode,
+      "bUnit": "1",
+      "sUnit": sUnit,
+      "sortCode": _maxLetterSort,
+      "sort": maxSort,
+      "minSortCode": _minLetterSort,
+      "minSort": minSort,
+      "waretypeSort": wareTypeSort,
+      "lsPrice": maxLsPrice,
+      "minLsPrice": minLsPrice,
+      "inPrice": maxInPrice,
+      "minInPrice": minInPrice,
+      "wareDj": maxPfPrice,
+      "sunitPrice": minPfPrice,
+      "innerAccPriceDefault": innerAccPriceDefault,
+      "lowestSalePrice": lowestSalePrice,
+      "wareFeatures": wareFeatures,
+      "qualityDays": quality,
+      "qualityUnit": _qualityValue,
+      "qualityAlert": qualityWarn,
+      "warnQty": warnQty,
+      "warePicList": _picList,
+//  "brandId":,
+//    "supId": 1032,
+//    "supName": "上海梅林泰康食品有限公司制造",
+//    "supType": 0,
+    };
+
+    LoadingDialogUtil.show();
+    var response = await Dio().post(
+        UrlUtil.WARE_SAVE,
+        data: data,
+        options: Options( headers: {"token": ContainsUtil.token} )
+        );
+    LoadingDialogUtil.dismiss();
+    logger.d(response);
+    BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
+    if(result.state!){
+      ToastUtil.success("保存成功");
+      _methodChannel.invokeMethod("closeActivity");
+    }else{
+      ToastUtil.error(result.msg);
+    }
   }
 
 
