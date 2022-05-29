@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
+import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/url_util.dart';
 
 class TreeWareTypeDialog extends Dialog {
@@ -42,17 +43,13 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
   }
 
   loadData() async {
+    LoadingDialogUtil.show();
     bool showKindType = true;
     bool showServiceType = false;
     if(widget.businessType=="1"){
       showKindType = false;
       showServiceType = true;
     }
-//    String token = "329abd93c3e0f60848afb4cc724b2e56";
-//    String url = "http://mp.qweib.com/web/basic/bas_ware_type/list_ware_type_group?token="+token.toString()+
-//        "&noCompany=0&showCarType=false&showOftenType=false&showFavType=false&showGroupType=false&showKindType="+showKindType.toString()+"&showServiceType="+showServiceType.toString()+
-//            "&businessType="+widget.businessType.toString()+"&isType="+widget.isType.toString();
-
     Map<String, dynamic>? params = {};
     params["noCompany"] = 0;
     params["showCarType"] = false;
@@ -70,7 +67,7 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
         options:
           Options(headers: {"token": ContainsUtil.token})
         );
-
+    LoadingDialogUtil.dismiss();
     setState(() {
       data.clear();
       json.decode(response.toString())['data'].forEach((item){

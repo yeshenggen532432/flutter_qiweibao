@@ -3,6 +3,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:flutterqiweibao/model/base/brand_bean.dart';
+import 'package:flutterqiweibao/model/base/brand_list_result.dart';
 import 'package:flutterqiweibao/model/base_result.dart';
 import 'package:flutterqiweibao/model/pic_bean.dart';
 import 'package:flutterqiweibao/model/pic_result.dart';
@@ -12,6 +14,7 @@ import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/tree/dialog/tree_ware_type_dialog.dart';
 import 'package:flutterqiweibao/tree/tree.dart';
+import 'package:flutterqiweibao/ui/photo_view_wrapper.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
@@ -23,6 +26,8 @@ import 'package:flutterqiweibao/utils/url_util.dart';
 import 'package:flutterqiweibao/utils/ware_is_type_util.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../utils/method_channel_util.dart';
+
 class WareEdit extends StatefulWidget {
   const WareEdit({Key? key}) : super(key: key);
 
@@ -33,69 +38,68 @@ class WareEdit extends StatefulWidget {
 }
 
 class WareEditState extends State<WareEdit> {
-  bool add = true;
-  int? wareId;
-  static MethodChannel _methodChannel = MethodChannel('com.cc.flutter/native');
+  bool add = false;
+  int? wareId = 123;
 
   @override
   void initState() {
+    getIntent();
     super.initState();
-    _methodChannel.setMethodCallHandler(_methodChannelHandler);
-    getWareIntent();
   }
 
-  getWareIntent() async{
-    var map = await _methodChannel.invokeMethod("WareIntent");
-    print("------------------------getWareIntent-----------------------:"+map.toString());
+  MethodChannel _methodChannel = MethodChannel(MethodChannelUtil.ware_edit);
+  getIntent() async {
+    _methodChannel.setMethodCallHandler(_methodChannelHandler);
+    var map = await _methodChannel.invokeMethod("getIntent");
+    print("------------------------getIntent-----------------------:" +
+        map.toString());
 //    Map<String, dynamic> map = {"add": false, "wareId": 123};
     setState(() {
       WareIntent wareIntent = WareIntent.fromJson(json.decode(map));
       add = wareIntent.add!;
       wareId = wareIntent.wareId;
-      if(!add){
+      if (!add) {
         queryDetail();
       }
     });
   }
 
   /// 原生 调用 Flutter的结果回调
-  Future<String> _methodChannelHandler(MethodCall call) async{
-    String result = "";
-    print("---------------_methodChannelHandler------------------------ method = ${call.method}");
-    switch(call.method){
+  Future<String> _methodChannelHandler(MethodCall call) async {
+    print(
+        "---------------_methodChannelHandler------------------------ method = ${call.method}");
+    switch (call.method) {
       case "callFlutter":
         setState(() {
           _isTypeText = call.arguments.toString();
         });
-        result = "Flutter 收到 Android发来的消息";
         break;
     }
-    return result;
+    return "";
   }
 
   Future<void> queryDetail() async {
-      EasyLoading.show(status: "加载中...");
-      Map<String, dynamic>? params = {"wareId":wareId};
-      var response = await Dio().get(
-          UrlUtil.ware_detail,
-          queryParameters: params,
-          options: Options(headers: {"token": ContainsUtil.token})
-      );
-      EasyLoading.dismiss();
-      logger.d(response);
-      WareResult result = WareResult.fromJson(json.decode(response.toString()));
-      if(result.state != null && result.state == true){
-        doUI(result.sysWare!);
-      }
+    EasyLoading.show(status: "加载中...");
+    Map<String, dynamic>? params = {"wareId": wareId};
+    var response = await Dio().get(UrlUtil.ware_detail,
+        queryParameters: params,
+        options: Options(headers: {"token": ContainsUtil.token}));
+    EasyLoading.dismiss();
+    logger.d(response);
+    WareResult result = WareResult.fromJson(json.decode(response.toString()));
+    if (result.state != null && result.state == true) {
+      doUI(result.sysWare!);
+    }
   }
 
-  void doUI(Ware ware){
+  void doUI(Ware ware) {
     setState(() {
       _wareId = ware.wareId;
       _isType = ware.isType!.toString();
       _isTypeText = WareIsTypeUtil.getText(_isType);
-      _businessType = ware.businessType != null? ware.businessType.toString(): "0";
-      _wareType = ware.waretype != null? ware.waretype.toString(): "0";
+      _businessType =
+          ware.businessType != null ? ware.businessType.toString() : "0";
+      _wareType = ware.waretype != null ? ware.waretype.toString() : "0";
       _wareTypeText = ware.waretypeNm!;
       _wareNameController.text = ware.wareNm!;
       _maxUnitController.text = ware.wareDw!;
@@ -103,33 +107,49 @@ class WareEditState extends State<WareEdit> {
       _maxWareGgUnitController.text = ware.wareGg!;
       _minWareGgUnitController.text = ware.minWareGg!;
       _maxBarCodeController.text = ware.packBarCode!;
-      _sUnitController.text = ware.sUnit != null? ware.sUnit.toString(): "";
+      _sUnitController.text = ware.sUnit != null ? ware.sUnit.toString() : "";
       _maxLetterSort = ware.sortCode!;
-      _maxSortController.text = ware.sort != null? ware.sort.toString(): "";
+      _maxSortController.text = ware.sort != null ? ware.sort.toString() : "";
       _minLetterSort = ware.minSortCode!;
-      _minSortController.text = ware.minSort != null? ware.minSort.toString(): "";
-      _wareTypeSortController.text = ware.waretypeSort != null? ware.waretypeSort.toString(): "";
-      _maxLsPriceController.text = ware.lsPrice != null? ware.lsPrice.toString(): "";
-      _minLsPriceController.text = ware.minLsPrice != null? ware.minLsPrice.toString(): "";
-      _maxInPriceController.text = ware.inPrice != null? ware.inPrice.toString(): "";
-      _minInPriceController.text = ware.minInPrice != null? ware.minInPrice.toString(): "";
-      _maxPfPriceController.text = ware.wareDj != null? ware.wareDj.toString(): "";
-      _minPfPriceController.text = ware.sunitPrice != null? ware.sunitPrice.toString(): "";
-      _innerAccPriceDefaultController.text = ware.innerAccPriceDefault != null? ware.innerAccPriceDefault.toString(): "";
-      _lowestSalePriceController.text = ware.lowestSalePrice != null? ware.lowestSalePrice.toString(): "";
-      _wareFeaturesController.text = ware.wareFeatures != null? ware.wareFeatures.toString(): "";
-      _qualityController.text = ware.qualityDays != null? ware.qualityDays.toString(): "";
-      _qualityWarnController.text = ware.qualityAlert != null? ware.qualityAlert.toString(): "";
-      _qualityValue =  ware.qualityUnit != null? ware.qualityUnit!: 1;
+      _minSortController.text =
+          ware.minSort != null ? ware.minSort.toString() : "";
+      _wareTypeSortController.text =
+          ware.waretypeSort != null ? ware.waretypeSort.toString() : "";
+      _maxLsPriceController.text =
+          ware.lsPrice != null ? ware.lsPrice.toString() : "";
+      _minLsPriceController.text =
+          ware.minLsPrice != null ? ware.minLsPrice.toString() : "";
+      _maxInPriceController.text =
+          ware.inPrice != null ? ware.inPrice.toString() : "";
+      _minInPriceController.text =
+          ware.minInPrice != null ? ware.minInPrice.toString() : "";
+      _maxPfPriceController.text =
+          ware.wareDj != null ? ware.wareDj.toString() : "";
+      _minPfPriceController.text =
+          ware.sunitPrice != null ? ware.sunitPrice.toString() : "";
+      _innerAccPriceDefaultController.text = ware.innerAccPriceDefault != null
+          ? ware.innerAccPriceDefault.toString()
+          : "";
+      _lowestSalePriceController.text =
+          ware.lowestSalePrice != null ? ware.lowestSalePrice.toString() : "";
+      _wareFeaturesController.text =
+          ware.wareFeatures != null ? ware.wareFeatures.toString() : "";
+      _qualityController.text =
+          ware.qualityDays != null ? ware.qualityDays.toString() : "";
+      _qualityWarnController.text =
+          ware.qualityAlert != null ? ware.qualityAlert.toString() : "";
+      _qualityValue = ware.qualityUnit != null ? ware.qualityUnit! : 1;
       _quality = QualityUnitUtil.getText(_qualityValue);
-      _warnQtyController.text = ware.warnQty != null? ware.warnQty.toString(): "";
+      _brandValue = ware.brandId;
+      _brandText =  ware.brandNm != null ? ware.brandNm.toString() : "";
+      _warnQtyController.text =
+          ware.warnQty != null ? ware.warnQty.toString() : "";
       _picList.addAll(ware.warePicList!);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
@@ -138,7 +158,7 @@ class WareEditState extends State<WareEdit> {
               Navigator.pop(context);
             },
           ),
-          title: Text(add?"新建商品": "修改商品")),
+          title: Text(add ? "新建商品" : "修改商品")),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.only(left: 10, right: 10),
         child: RaisedButton(
@@ -153,31 +173,31 @@ class WareEditState extends State<WareEdit> {
         child: ListView(
           children: [
             SizedBox(
-              child: Column(
-                children:[
-                  Container(
-                    alignment: Alignment.center,
-                    child: IconButton(onPressed: (){
-                      _imagePickerByCamera();
-                    }, icon: const Icon(Icons.photo_camera)),
-                  ),
-                  Offstage(
-                    offstage: _picList.isEmpty? true: false,
-                    child: GridView.builder(
-                        shrinkWrap: true,
-                        scrollDirection: Axis.vertical,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: _picList.length,
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 5,
-                          mainAxisSpacing: 5,
-                          crossAxisSpacing: 5,
-                        ),
-                        itemBuilder: (_, position)=> _picItem(position)
-                    ),
-                  )
-                ]
-              ),
+              child: Column(children: [
+                Container(
+                  alignment: Alignment.center,
+                  child: IconButton(
+                      onPressed: () {
+                        _imagePickerByCamera();
+                      },
+                      icon: const Icon(Icons.photo_camera)),
+                ),
+                Offstage(
+                  offstage: _picList.isEmpty ? true : false,
+                  child: GridView.builder(
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _picList.length,
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 5,
+                        mainAxisSpacing: 5,
+                        crossAxisSpacing: 5,
+                      ),
+                      itemBuilder: (_, position) => _picItem(position)),
+                )
+              ]),
             ),
             SizedBox(
               height: 40,
@@ -205,7 +225,9 @@ class WareEditState extends State<WareEdit> {
                   Radio(
                       value: "0",
                       groupValue: _businessType,
-                      onChanged: (value) => !add? null: _changeRadioValue(value)),
+//                      onChanged: (value) => !add? null: _changeRadioValue(value)),
+                      onChanged:
+                          !add ? null : (value) => _changeRadioValue(value)),
                   Text("实物商品",
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
@@ -213,7 +235,9 @@ class WareEditState extends State<WareEdit> {
                   Radio(
                       value: "1",
                       groupValue: _businessType,
-                      onChanged: (value) => !add? null: _changeRadioValue(value)),
+//                      onChanged: (value) => !add? null: _changeRadioValue(value)),
+                      onChanged:
+                          !add ? null : (value) => _changeRadioValue(value)),
                   Text("服务商品",
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
@@ -381,6 +405,12 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _maxBarCodeController,
+                        maxLines: 3,
+                        minLines: 1,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
+                        ],
                         decoration: InputDecoration(
                             hintText: "如(箱码)",
                             hintStyle: TextStyle(
@@ -389,8 +419,12 @@ class WareEditState extends State<WareEdit> {
                             border: const OutlineInputBorder(
                                 borderSide: BorderSide.none)),
                       )),
-                      IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.scanner))
+                      SizedBox(
+                        width: 30,
+                        child: IconButton(
+                            onPressed: () {
+                            }, icon: const Icon(Icons.scanner)),
+                      )
                     ],
                   )),
                   Expanded(
@@ -403,6 +437,12 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _minBarCodeController,
+                        maxLines: 3,
+                        minLines: 1,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(
+                              RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
+                        ],
                         decoration: InputDecoration(
                             hintText: "如(瓶码)",
                             hintStyle: TextStyle(
@@ -411,8 +451,12 @@ class WareEditState extends State<WareEdit> {
                             border: const OutlineInputBorder(
                                 borderSide: BorderSide.none)),
                       )),
-                      IconButton(
-                          onPressed: () {}, icon: const Icon(Icons.scanner))
+                      SizedBox(
+                        width: 30,
+                        child: IconButton(
+                            onPressed: () {
+                            }, icon: const Icon(Icons.scanner)),
+                      )
                     ],
                   ))
                 ],
@@ -436,6 +480,7 @@ class WareEditState extends State<WareEdit> {
                   Expanded(
                       child: TextField(
                     controller: _sUnitController,
+                    keyboardType: TextInputType.number,
                     decoration: InputDecoration(
                         hintText: "点击输入",
                         hintStyle: TextStyle(
@@ -487,6 +532,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _maxSortController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "输入",
                             hintStyle: TextStyle(
@@ -521,6 +567,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _minSortController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "输入",
                             hintStyle: TextStyle(
@@ -547,6 +594,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _wareTypeSortController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -574,6 +622,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _maxLsPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -594,6 +643,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _minLsPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -621,6 +671,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _maxInPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -641,6 +692,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _minInPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -668,6 +720,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _maxPfPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -688,6 +741,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _minPfPriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -715,6 +769,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _innerAccPriceDefaultController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -746,6 +801,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _lowestSalePriceController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -809,6 +865,10 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _qualityController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp("[0-9]"))
+                        ],
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -840,6 +900,10 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _qualityWarnController,
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp("[0-9]"))
+                        ],
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -869,7 +933,9 @@ class WareEditState extends State<WareEdit> {
                               color: ColorUtil.GRAY_6,
                               fontSize: FontSizeUtil.MIDDLE)),
                       TextButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.of(context).pushNamed("choose_customer");
+                          },
                           child: Text("选择" + StringUtil.ARROW_DOWN,
                               style: TextStyle(
                                   color: ColorUtil.BLUE,
@@ -884,8 +950,10 @@ class WareEditState extends State<WareEdit> {
                               color: ColorUtil.GRAY_6,
                               fontSize: FontSizeUtil.MIDDLE)),
                       TextButton(
-                          onPressed: () {},
-                          child: Text("选择" + StringUtil.ARROW_DOWN,
+                          onPressed: () {
+                            _showDialogBrandList();
+                          },
+                          child: Text(_brandText.isNotEmpty? _brandText + StringUtil.ARROW_DOWN: "选择" + StringUtil.ARROW_DOWN,
                               style: TextStyle(
                                   color: ColorUtil.BLUE,
                                   fontSize: FontSizeUtil.MIDDLE)))
@@ -908,6 +976,7 @@ class WareEditState extends State<WareEdit> {
                       Expanded(
                           child: TextField(
                         controller: _warnQtyController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
                             hintText: "点击输入",
                             hintStyle: TextStyle(
@@ -947,11 +1016,15 @@ class WareEditState extends State<WareEdit> {
   String _quality = "天";
   int _qualityValue = 1;
   int? _wareId;
+  int? _brandValue;
+  String _brandText = "";
   final TextEditingController _wareNameController = TextEditingController();
   final TextEditingController _maxUnitController = TextEditingController();
   final TextEditingController _minUnitController = TextEditingController();
-  final TextEditingController _maxWareGgUnitController = TextEditingController();
-  final TextEditingController _minWareGgUnitController = TextEditingController();
+  final TextEditingController _maxWareGgUnitController =
+      TextEditingController();
+  final TextEditingController _minWareGgUnitController =
+      TextEditingController();
   final TextEditingController _maxBarCodeController = TextEditingController();
   final TextEditingController _minBarCodeController = TextEditingController();
   final TextEditingController _sUnitController = TextEditingController();
@@ -964,14 +1037,17 @@ class WareEditState extends State<WareEdit> {
   final TextEditingController _minInPriceController = TextEditingController();
   final TextEditingController _maxPfPriceController = TextEditingController();
   final TextEditingController _minPfPriceController = TextEditingController();
-  final TextEditingController _innerAccPriceDefaultController = TextEditingController();
-  final TextEditingController _lowestSalePriceController = TextEditingController();
+  final TextEditingController _innerAccPriceDefaultController =
+      TextEditingController();
+  final TextEditingController _lowestSalePriceController =
+      TextEditingController();
   final TextEditingController _wareFeaturesController = TextEditingController();
   final TextEditingController _qualityController = TextEditingController();
   final TextEditingController _qualityWarnController = TextEditingController();
   final TextEditingController _warnQtyController = TextEditingController();
 
   void _showDialogWareIsType(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
     showDialog(
         context: context,
         builder: (_) => SimpleDialog(
@@ -1025,6 +1101,7 @@ class WareEditState extends State<WareEdit> {
 
   List<Map<String, dynamic>> _checkList = [];
   _showDialogWareType(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
     showDialog(
         context: context,
         barrierDismissible: false,
@@ -1045,7 +1122,53 @@ class WareEditState extends State<WareEdit> {
         });
   }
 
+  List<BrandBean> _brandList = [];
+  void _showDialogBrandList() async{
+    if(_brandList.isEmpty){
+      FocusManager.instance.primaryFocus?.unfocus();
+      LoadingDialogUtil.show();
+      var response = await Dio().get(UrlUtil.brand_list, options: Options(headers: {"token": ContainsUtil.token}));
+      LoadingDialogUtil.dismiss();
+      logger.d(response);
+      BrandListResult result = BrandListResult.fromJson(json.decode(response.toString()));
+      if (result.state!) {
+        _brandList = result.data!;
+      } else {
+        ToastUtil.error(result.msg);
+      }
+    }
+
+    if(_brandList.isNotEmpty){
+      showDialog(
+          context: context,
+          builder: (_) => SimpleDialog(
+            title: Text("选择品牌",
+                style: TextStyle(
+                    color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG)),
+            children: getItemBrand(_brandList),
+          ));
+    }
+  }
+
+  List<Widget> getItemBrand(list) {
+    List<Widget> widgetList = [];
+    list.forEach((item) {
+      widgetList.add(SimpleDialogOption(
+        child: Text(item.name),
+        onPressed: () {
+          Navigator.pop(context);
+          setState(() {
+            _brandValue = item.id;
+            _brandText = item.name;
+          });
+        },
+      ));
+    });
+    return widgetList;
+  }
+
   void _showDialogLetter(BuildContext context, bool isMax) {
+    FocusManager.instance.primaryFocus?.unfocus();
     showDialog(
         context: context,
         builder: (_) => SimpleDialog(
@@ -1119,6 +1242,7 @@ class WareEditState extends State<WareEdit> {
   }
 
   void _showDialogQuality(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
     showDialog(
         context: context,
         builder: (_) => SimpleDialog(
@@ -1163,39 +1287,57 @@ class WareEditState extends State<WareEdit> {
   }
 
   List<WarePic> _picList = [];
-  Widget _picItem(int position){
+  Widget _picItem(int position) {
     WarePic pic = _picList[position];
-//    File file = File(pic);
-    return Stack(
-      children:[
-        Positioned.fill(child: GestureDetector(
-          onTap: (){
-          },
-          child: RepaintBoundary(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8.0),
-              child: Image.network(UrlUtil.ROOT_UPLOAD + pic.picMini!, fit:BoxFit.cover),
-            ),
-          ),
-        )),
-        Positioned(
-          right: 0,
+    return Stack(children: [
+      Positioned.fill(
           child: GestureDetector(
-            onTap: (){
-              delPic(pic.pic!, position);
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20)
-              ),
-              width: 20,
-              height: 20,
-              child: Icon(Icons.close, color: ColorUtil.GRAY_9, size: 18,),
+        onTap: () {
+          zoomPic(context, position);
+        },
+        child: RepaintBoundary(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: Image.network(UrlUtil.ROOT_UPLOAD + pic.pic!,
+                fit: BoxFit.cover),
+          ),
+        ),
+      )),
+      Positioned(
+        right: 0,
+        child: GestureDetector(
+          onTap: () {
+            delPic(pic.pic!, position);
+          },
+          child: Container(
+            decoration: BoxDecoration(
+                color: Colors.white, borderRadius: BorderRadius.circular(20)),
+            width: 20,
+            height: 20,
+            child: Icon(
+              Icons.close,
+              color: ColorUtil.GRAY_9,
+              size: 18,
             ),
           ),
-        )
-      ]
+        ),
+      )
+    ]);
+  }
+
+  void zoomPic(BuildContext context, final int index) {
+    List<String> list = [];
+    _picList.forEach((element) {
+      list.add(UrlUtil.ROOT_UPLOAD + element.pic!);
+    });
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PhotoViewWrapper(
+          items: list,
+          index: index,
+        ),
+      ),
     );
   }
 
@@ -1206,7 +1348,8 @@ class WareEditState extends State<WareEdit> {
     map["path"] = "ware";
     map["file"] = await MultipartFile.fromFile(filePath);
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.upload_pic_single, data: data, options: Options(headers: {"token": ContainsUtil.token}));
+    var response = await dio.post(UrlUtil.upload_pic_single,
+        data: data, options: Options(headers: {"token": ContainsUtil.token}));
     logger.d(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
     setState(() {
@@ -1222,11 +1365,12 @@ class WareEditState extends State<WareEdit> {
     Map<String, dynamic> map = {};
     map["object"] = filePath;
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.del_pic_single, data: data, options: Options(headers: {"token": ContainsUtil.token}));
+    var response = await dio.post(UrlUtil.del_pic_single,
+        data: data, options: Options(headers: {"token": ContainsUtil.token}));
     logger.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     setState(() {
-      if(result.state != null && result.state == true){
+      if (result.state != null && result.state == true) {
         EasyLoading.dismiss();
         ToastUtil.success("删除成功");
         _picList.removeAt(index);
@@ -1299,21 +1443,16 @@ class WareEditState extends State<WareEdit> {
     };
 
     LoadingDialogUtil.show();
-    var response = await Dio().post(
-        UrlUtil.WARE_SAVE,
-        data: data,
-        options: Options( headers: {"token": ContainsUtil.token} )
-        );
+    var response = await Dio().post(UrlUtil.WARE_SAVE,
+        data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     logger.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
-    if(result.state!){
+    if (result.state!) {
       ToastUtil.success("保存成功");
       _methodChannel.invokeMethod("closeActivity");
-    }else{
+    } else {
       ToastUtil.error(result.msg);
     }
   }
-
-
 }
