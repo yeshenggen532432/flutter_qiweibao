@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutterqiweibao/model/base/brand_bean.dart';
 import 'package:flutterqiweibao/model/base/brand_list_result.dart';
+import 'package:flutterqiweibao/model/base/menu_bean.dart';
+import 'package:flutterqiweibao/model/base/menu_result.dart';
 import 'package:flutterqiweibao/model/base_result.dart';
 import 'package:flutterqiweibao/model/pic_bean.dart';
 import 'package:flutterqiweibao/model/pic_result.dart';
@@ -19,6 +21,7 @@ import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
+import 'package:flutterqiweibao/utils/menu_code_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
@@ -43,6 +46,7 @@ class WareEditState extends State<WareEdit> {
 
   @override
   void initState() {
+    getMenuList();
     getIntent();
     super.initState();
   }
@@ -86,7 +90,7 @@ class WareEditState extends State<WareEdit> {
         queryParameters: params,
         options: Options(headers: {"token": ContainsUtil.token}));
     EasyLoading.dismiss();
-    logger.d(response);
+    print(response);
     WareResult result = WareResult.fromJson(json.decode(response.toString()));
     if (result.state != null && result.state == true) {
       doUI(result.sysWare!);
@@ -141,11 +145,15 @@ class WareEditState extends State<WareEdit> {
           ware.qualityAlert != null ? ware.qualityAlert.toString() : "";
       _qualityValue = ware.qualityUnit != null ? ware.qualityUnit! : 1;
       _quality = QualityUnitUtil.getText(_qualityValue);
+      _supId = ware.supId;
+      _supType = ware.supType;
+      _supName =  ware.supName != null ? ware.supName.toString() : "";
       _brandValue = ware.brandId;
       _brandText =  ware.brandNm != null ? ware.brandNm.toString() : "";
       _warnQtyController.text =
           ware.warnQty != null ? ware.warnQty.toString() : "";
       _picList.addAll(ware.warePicList!);
+
     });
   }
 
@@ -163,13 +171,16 @@ class WareEditState extends State<WareEdit> {
           title: Text(add ? "新建商品" : "修改商品")),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.only(left: 10, right: 10),
-        child: RaisedButton(
-            onPressed: (){
-              _save(true);
-            },
-            child: const Text("保存"),
-            textColor: Colors.white,
-            color: Colors.blue),
+        child: Offstage(
+          offstage: !btnSave,
+          child: RaisedButton(
+              onPressed: (){
+                _save(true);
+              },
+              child: const Text("保存"),
+              textColor: Colors.white,
+              color: Colors.blue),
+        ),
       ),
       body: Container(
         margin: const EdgeInsets.only(left: 10, right: 10),
@@ -711,52 +722,55 @@ class WareEditState extends State<WareEdit> {
               ),
             ),
             Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("批发价(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxPfPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("批发价(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _minPfPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
+            Offstage(
+              offstage: !btnPfPrice,
+              child: SizedBox(
+                child: Row(
+                  children: [
+                    Expanded(
+                        child: Row(
+                          children: [
+                            Text("批发价(大):",
+                                style: TextStyle(
+                                    color: ColorUtil.GRAY_6,
+                                    fontSize: FontSizeUtil.MIDDLE)),
+                            Expanded(
+                                child: TextField(
+                                  controller: _maxPfPriceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                      hintText: "点击输入",
+                                      hintStyle: TextStyle(
+                                          color: ColorUtil.GRAY_9,
+                                          fontSize: FontSizeUtil.MIDDLE),
+                                      border: const OutlineInputBorder(
+                                          borderSide: BorderSide.none)),
+                                ))
+                          ],
+                        )),
+                    Expanded(
+                        child: Row(
+                          children: [
+                            Text("批发价(小):",
+                                style: TextStyle(
+                                    color: ColorUtil.GRAY_6,
+                                    fontSize: FontSizeUtil.MIDDLE)),
+                            Expanded(
+                                child: TextField(
+                                  controller: _minPfPriceController,
+                                  keyboardType: TextInputType.number,
+                                  decoration: InputDecoration(
+                                      hintText: "点击输入",
+                                      hintStyle: TextStyle(
+                                          color: ColorUtil.GRAY_9,
+                                          fontSize: FontSizeUtil.MIDDLE),
+                                      border: const OutlineInputBorder(
+                                          borderSide: BorderSide.none)),
+                                ))
+                          ],
+                        ))
+                  ],
+                ),
               ),
             ),
             Divider(height: 1, color: ColorUtil.LINE_GRAY),
@@ -938,9 +952,9 @@ class WareEditState extends State<WareEdit> {
                               fontSize: FontSizeUtil.MIDDLE)),
                       TextButton(
                           onPressed: () {
-                            Navigator.of(context).pushNamed("choose_customer");
+//                            Navigator.of(context).pushNamed("choose_customer");
                           },
-                          child: Text("选择" + StringUtil.ARROW_DOWN,
+                          child: Text(_supName.isNotEmpty? _supName + StringUtil.ARROW_DOWN: "选择" + StringUtil.ARROW_DOWN,
                               style: TextStyle(
                                   color: ColorUtil.BLUE,
                                   fontSize: FontSizeUtil.MIDDLE)))
@@ -1022,6 +1036,9 @@ class WareEditState extends State<WareEdit> {
   int? _wareId;
   int? _brandValue;
   String _brandText = "";
+  int? _supId;
+  String _supName = "";
+  int? _supType;
   final TextEditingController _wareNameController = TextEditingController();
   final TextEditingController _maxUnitController = TextEditingController();
   final TextEditingController _minUnitController = TextEditingController();
@@ -1133,7 +1150,7 @@ class WareEditState extends State<WareEdit> {
       LoadingDialogUtil.show();
       var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list, options: Options(headers: {"token": ContainsUtil.token}));
       LoadingDialogUtil.dismiss();
-      logger.d(response);
+      print(response);
       BrandListResult result = BrandListResult.fromJson(json.decode(response.toString()));
       if (result.state!) {
         _brandList = result.data!;
@@ -1354,7 +1371,7 @@ class WareEditState extends State<WareEdit> {
     var data = FormData.fromMap(map);
     var response = await dio.post(UrlUtil.ROOT + UrlUtil.upload_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
-    logger.d(response);
+    print(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
     setState(() {
       EasyLoading.dismiss();
@@ -1371,7 +1388,7 @@ class WareEditState extends State<WareEdit> {
     var data = FormData.fromMap(map);
     var response = await dio.post(UrlUtil.ROOT + UrlUtil.del_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
-    logger.d(response);
+    print(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     setState(() {
       if (result.state != null && result.state == true) {
@@ -1462,16 +1479,16 @@ class WareEditState extends State<WareEdit> {
       "warnQty": warnQty,
       "warePicList": _picList,
       "brandId":_brandValue,
-//    "supId": 1032,
-//    "supName": "上海梅林泰康食品有限公司制造",
-//    "supType": 0,
+      "supId": _supId,
+      "supName": _supName,
+      "supType": _supType,
     };
 
     LoadingDialogUtil.show();
     var response = await Dio().post(UrlUtil.ROOT + UrlUtil.WARE_SAVE,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    logger.d(response);
+    print(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     if (100 == result.code) {
       _showDialogTip(result.message!);
@@ -1482,4 +1499,79 @@ class WareEditState extends State<WareEdit> {
       ToastUtil.error(result.msg);
     }
   }
+
+  bool btnSave = false;
+  bool btnInfo1= false;
+  bool btnInfo2= false;
+  bool btnPfPrice= false;
+  bool btnInPrice= false;
+  bool btnInnerAccPriceDefault= false;
+  bool btnLowestSalePrice= false;
+  bool btnCustomerTypePrice= false;
+  bool btnUpdateCustomerTypePrice= false;
+  Future<void> getMenuList() async {
+    if(add){
+      btnSave = true;
+    }
+    LoadingDialogUtil.show();
+    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.menu_list, options: Options(headers: {"token": ContainsUtil.token}));
+    LoadingDialogUtil.dismiss();
+    print(response);
+    MenuResult result = MenuResult.fromJson(json.decode(response.toString()));
+    if (result.state!) {
+      List<MenuBean>? applyList = result.applyList;
+      if(applyList!.isNotEmpty){
+        //第一层
+        applyList.forEach((apply) {
+          List<MenuBean>? menuList = apply.children;
+          if(menuList!.isNotEmpty){
+            //第二层
+            menuList.forEach((menu) {
+              if(MenuCodeUtil.ware_manager == menu.applyCode){
+                //第三层
+                List<MenuBean>? btnList = menu.children;
+                if(btnList!.isNotEmpty){
+                  setState(() {
+                    btnList.forEach((btn) {
+                      if(!add && MenuCodeUtil.ware_manager_btn_update == btn.applyCode){
+                        btnSave = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_info1 == btn.applyCode){
+                        btnInfo1 = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_info2 == btn.applyCode){
+                        btnInfo2 = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_pf_price == btn.applyCode){
+                        btnPfPrice = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_in_price == btn.applyCode){
+                        btnInPrice = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_inner_acc_price_default == btn.applyCode){
+                        btnInnerAccPriceDefault = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_lowest_sale_price == btn.applyCode){
+                        btnLowestSalePrice = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_customer_type_price == btn.applyCode){
+                        btnCustomerTypePrice = true;
+                      }
+                      if(MenuCodeUtil.ware_manager_btn_update_customer_type_price == btn.applyCode){
+                        btnUpdateCustomerTypePrice = true;
+                      }
+                    });
+                  });
+                }
+                return;
+              }
+            });
+          }
+        });
+      }
+    } else {
+      ToastUtil.error(result.msg);
+    }
+  }
+
 }
