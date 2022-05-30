@@ -55,7 +55,8 @@ class WareEditState extends State<WareEdit> {
   getIntent() async {
     _methodChannel.setMethodCallHandler(_methodChannelHandler);
     var map = await _methodChannel.invokeMethod("getIntent");
-    print("------------------------getIntent-----------------------:" + map.toString());
+    print("------------------------getIntent-----------------------:" +
+        map.toString());
 //    Map<String, dynamic> map = {"add": false, "wareId": 123};
     setState(() {
       WareEditIntent intent = WareEditIntent.fromJson(json.decode(map));
@@ -147,13 +148,12 @@ class WareEditState extends State<WareEdit> {
       _quality = QualityUnitUtil.getText(_qualityValue);
       _supId = ware.supId;
       _supType = ware.supType;
-      _supName =  ware.supName != null ? ware.supName.toString() : "";
+      _supName = ware.supName != null ? ware.supName.toString() : "";
       _brandValue = ware.brandId;
-      _brandText =  ware.brandNm != null ? ware.brandNm.toString() : "";
+      _brandText = ware.brandNm != null ? ware.brandNm.toString() : "";
       _warnQtyController.text =
           ware.warnQty != null ? ware.warnQty.toString() : "";
       _picList.addAll(ware.warePicList!);
-
     });
   }
 
@@ -174,7 +174,7 @@ class WareEditState extends State<WareEdit> {
         child: Offstage(
           offstage: !btnSave,
           child: RaisedButton(
-              onPressed: (){
+              onPressed: () {
                 _save(true);
               },
               child: const Text("保存"),
@@ -187,106 +187,113 @@ class WareEditState extends State<WareEdit> {
         color: Colors.white,
         child: ListView(
           children: [
-            SizedBox(
-              child: Column(children: [
-                Container(
-                  alignment: Alignment.center,
-                  child: IconButton(
-                      onPressed: () {
-                        _imagePickerByCamera();
-                      },
-                      icon: const Icon(Icons.photo_camera)),
-                ),
-                Offstage(
-                  offstage: _picList.isEmpty ? true : false,
-                  child: GridView.builder(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.vertical,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _picList.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 5,
-                        mainAxisSpacing: 5,
-                        crossAxisSpacing: 5,
+            Offstage(
+              offstage: !viewInfo,
+              child:Column(
+                children:[
+                  SizedBox(
+                    child: Column(children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                            onPressed: () {
+                              _imagePickerByCamera();
+                            },
+                            icon: const Icon(Icons.photo_camera)),
                       ),
-                      itemBuilder: (_, position) => _picItem(position)),
-                )
-              ]),
-            ),
-            SizedBox(
-              height: 40,
-              child: Row(
-                children: [
-                  Text("商品总类:", style: TextStyle(color: ColorUtil.GRAY_6)),
-                  Expanded(
-                      child: GestureDetector(
-                    onTap: () {
-                      _showDialogWareIsType(context);
-                    },
-                    child: Text(_isTypeText,
-                        style: TextStyle(color: ColorUtil.BLUE)),
-                  )),
-                  const Icon(Icons.arrow_drop_down)
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              height: 40,
-              child: Row(
-                children: [
-                  Text("商品类别属性:", style: TextStyle(color: ColorUtil.GRAY_6)),
-                  Radio(
-                      value: "0",
-                      groupValue: _businessType,
-//                      onChanged: (value) => !add? null: _changeRadioValue(value)),
-                      onChanged:
-                          !add ? null : (value) => _changeRadioValue(value)),
-                  Text("实物商品",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                  Radio(
-                      value: "1",
-                      groupValue: _businessType,
-//                      onChanged: (value) => !add? null: _changeRadioValue(value)),
-                      onChanged:
-                          !add ? null : (value) => _changeRadioValue(value)),
-                  Text("服务商品",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              height: 40,
-              child: Row(
-                children: [
-                  Text("商品类别:", style: TextStyle(color: ColorUtil.GRAY_6)),
-                  Expanded(
-                      child: GestureDetector(
-                    onTap: () {
-                      _showDialogWareType(context);
-                    },
-                    child: Text(_wareTypeText,
-                        style: TextStyle(color: ColorUtil.BLUE)),
-                  )),
-                  const Icon(Icons.arrow_drop_down)
-                ],
-              ),
-            ),
-            Divider(
-              height: 1,
-              color: ColorUtil.LINE_GRAY,
+                      Offstage(
+                        offstage: _picList.isEmpty ? true : false,
+                        child: GridView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _picList.length,
+                            gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 5,
+                              mainAxisSpacing: 5,
+                              crossAxisSpacing: 5,
+                            ),
+                            itemBuilder: (_, position) => _picItem(position)),
+                      )
+                    ]),
+                  ),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      children: [
+                        Text("商品总类:", style: TextStyle(color: ColorUtil.GRAY_6)),
+                        Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                _showDialogWareIsType(context);
+                              },
+                              child: Text(_isTypeText,
+                                  style: TextStyle(color: ColorUtil.BLUE)),
+                            )),
+                        const Icon(Icons.arrow_drop_down)
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      children: [
+                        Text("商品类别属性:", style: TextStyle(color: ColorUtil.GRAY_6)),
+                        Radio(
+                            value: "0",
+                            groupValue: _businessType,
+                            onChanged:
+                            !add ? null : (value) => _changeRadioValue(value)),
+                        Text("实物商品",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_6,
+                                fontSize: FontSizeUtil.MIDDLE)),
+                        Radio(
+                            value: "1",
+                            groupValue: _businessType,
+                            onChanged:
+                            !add ? null : (value) => _changeRadioValue(value)),
+                        Text("服务商品",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_6,
+                                fontSize: FontSizeUtil.MIDDLE)),
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                  SizedBox(
+                    height: 40,
+                    child: Row(
+                      children: [
+                        Text("商品类别:", style: TextStyle(color: ColorUtil.GRAY_6)),
+                        Expanded(
+                            child: GestureDetector(
+                              onTap: () {
+                                _showDialogWareType(context);
+                              },
+                              child: Text(_wareTypeText,
+                                  style: TextStyle(color: ColorUtil.BLUE)),
+                            )),
+                        const Icon(Icons.arrow_drop_down)
+                      ],
+                    ),
+                  ),
+                  Divider(
+                    height: 1,
+                    color: ColorUtil.LINE_GRAY,
+                  ),
+                ]
+              )
             ),
             Container(
                 height: 40,
                 alignment: Alignment.center,
                 child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      _showWareInfo();
+                    },
                     child: Text("商品基础信息" + StringUtil.ARROW_DOWN))),
             SizedBox(
               child: Row(
@@ -308,7 +315,7 @@ class WareEditState extends State<WareEdit> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xffeeeeee)),
+            Divider(height: 1, color: ColorUtil.LINE_GRAY),
             SizedBox(
               child: Row(
                 children: [
@@ -355,668 +362,746 @@ class WareEditState extends State<WareEdit> {
                 ],
               ),
             ),
-            const Divider(height: 1, color: Color(0xffeeeeee)),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text(
-                        "规格(大):",
-                        style: TextStyle(
-                            color: ColorUtil.GRAY_6,
-                            fontSize: FontSizeUtil.MIDDLE),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxWareGgUnitController,
-                        decoration: const InputDecoration(
-                            hintText: "如500ml*6",
-                            hintStyle: TextStyle(
-                                color: Color(0xff999999), fontSize: 13),
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text(
-                        "规格(小):",
-                        style: TextStyle(
-                            color: ColorUtil.GRAY_6,
-                            fontSize: FontSizeUtil.MIDDLE),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: _minWareGgUnitController,
-                        decoration: const InputDecoration(
-                            hintText: "如500ml",
-                            hintStyle: TextStyle(
-                                color: Color(0xff999999), fontSize: 13),
-                            border: OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            const Divider(height: 1, color: Color(0xffeeeeee)),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text(
-                        "条码(大):",
-                        style: TextStyle(
-                            color: ColorUtil.GRAY_6,
-                            fontSize: FontSizeUtil.MIDDLE),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxBarCodeController,
-                        maxLines: 3,
-                        minLines: 1,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
-                        ],
-                        decoration: InputDecoration(
-                            hintText: "如(箱码)",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      )),
-                      SizedBox(
-                        width: 30,
-                        child: IconButton(
-                            onPressed: () {
-                            }, icon: const Icon(Icons.scanner)),
-                      )
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("条码(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _minBarCodeController,
-                        maxLines: 3,
-                        minLines: 1,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(
-                              RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
-                        ],
-                        decoration: InputDecoration(
-                            hintText: "如(瓶码)",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      )),
-                      SizedBox(
-                        width: 30,
-                        child: IconButton(
-                            onPressed: () {
-                            }, icon: const Icon(Icons.scanner)),
-                      )
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Text("大小单位换算比例:",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                  Text("1",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_3, fontSize: FontSizeUtil.BIG)),
-                  Text("*大单位=",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                  Expanded(
-                      child: TextField(
-                    controller: _sUnitController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                        hintText: "点击输入",
-                        hintStyle: TextStyle(
-                            color: ColorUtil.GRAY_9,
-                            fontSize: FontSizeUtil.MIDDLE),
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none)),
-                  )),
-                  Text("*小单位",
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                ],
-              ),
-            ),
-            Container(
-              height: 40,
-              alignment: Alignment.center,
-              child: TextButton(
-                  onPressed: () {},
-                  child: Text("商品辅助信息1" + StringUtil.ARROW_DOWN,
-                      style: TextStyle(
-                          color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG))),
-            ),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("总排序(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      SizedBox(
-                        width: 50,
-                        child: TextButton(
-                            onPressed: () {
-                              _showDialogLetter(context, true);
-                            },
-                            child: Text(
-                                _maxLetterSort.isNotEmpty
-                                    ? _maxLetterSort + StringUtil.ARROW_DOWN
-                                    : "选择" + StringUtil.ARROW_DOWN,
-                                style: TextStyle(
-                                    color: ColorUtil.BLUE,
-                                    fontSize: FontSizeUtil.MIDDLE))),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxSortController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("总排序(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      SizedBox(
-                        width: 50,
-                        child: TextButton(
-                            onPressed: () {
-                              _showDialogLetter(context, false);
-                            },
-                            child: Text(
-                                _minLetterSort.isNotEmpty
-                                    ? _minLetterSort + StringUtil.ARROW_DOWN
-                                    : "选择" + StringUtil.ARROW_DOWN,
-                                style: TextStyle(
-                                    color: ColorUtil.BLUE,
-                                    fontSize: FontSizeUtil.MIDDLE))),
-                      ),
-                      Expanded(
-                          child: TextField(
-                        controller: _minSortController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                ],
-              ),
-            ),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("分类排序:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _wareTypeSortController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("原价(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxLsPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("原价(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _minLsPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("采购价(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxInPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("采购价(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _minInPriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
             Divider(height: 1, color: ColorUtil.LINE_GRAY),
             Offstage(
-              offstage: !btnPfPrice,
-              child: SizedBox(
-                child: Row(
-                  children: [
-                    Expanded(
-                        child: Row(
-                          children: [
-                            Text("批发价(大):",
-                                style: TextStyle(
-                                    color: ColorUtil.GRAY_6,
-                                    fontSize: FontSizeUtil.MIDDLE)),
-                            Expanded(
-                                child: TextField(
-                                  controller: _maxPfPriceController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                      hintText: "点击输入",
-                                      hintStyle: TextStyle(
-                                          color: ColorUtil.GRAY_9,
-                                          fontSize: FontSizeUtil.MIDDLE),
-                                      border: const OutlineInputBorder(
-                                          borderSide: BorderSide.none)),
-                                ))
-                          ],
-                        )),
-                    Expanded(
-                        child: Row(
-                          children: [
-                            Text("批发价(小):",
-                                style: TextStyle(
-                                    color: ColorUtil.GRAY_6,
-                                    fontSize: FontSizeUtil.MIDDLE)),
-                            Expanded(
-                                child: TextField(
-                                  controller: _minPfPriceController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                      hintText: "点击输入",
-                                      hintStyle: TextStyle(
-                                          color: ColorUtil.GRAY_9,
-                                          fontSize: FontSizeUtil.MIDDLE),
-                                      border: const OutlineInputBorder(
-                                          borderSide: BorderSide.none)),
-                                ))
-                          ],
-                        ))
-                  ],
-                ),
-              ),
+              offstage:!viewInfo,
+              child:Column(
+                children:[
+                  SizedBox(
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "规格(大):",
+                                  style: TextStyle(
+                                      color: ColorUtil.GRAY_6,
+                                      fontSize: FontSizeUtil.MIDDLE),
+                                ),
+                                Expanded(
+                                    child: TextField(
+                                      controller: _maxWareGgUnitController,
+                                      decoration: const InputDecoration(
+                                          hintText: "如500ml*6",
+                                          hintStyle: TextStyle(
+                                              color: Color(0xff999999), fontSize: 13),
+                                          border: OutlineInputBorder(
+                                              borderSide: BorderSide.none)),
+                                    ))
+                              ],
+                            )),
+                        Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "规格(小):",
+                                  style: TextStyle(
+                                      color: ColorUtil.GRAY_6,
+                                      fontSize: FontSizeUtil.MIDDLE),
+                                ),
+                                Expanded(
+                                    child: TextField(
+                                      controller: _minWareGgUnitController,
+                                      decoration: const InputDecoration(
+                                          hintText: "如500ml",
+                                          hintStyle: TextStyle(
+                                              color: Color(0xff999999), fontSize: 13),
+                                          border: OutlineInputBorder(
+                                              borderSide: BorderSide.none)),
+                                    ))
+                              ],
+                            ))
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                  SizedBox(
+                    child: Row(
+                      children: [
+                        Expanded(
+                            child: Row(
+                              children: [
+                                Text(
+                                  "条码(大):",
+                                  style: TextStyle(
+                                      color: ColorUtil.GRAY_6,
+                                      fontSize: FontSizeUtil.MIDDLE),
+                                ),
+                                Expanded(
+                                    child: TextField(
+                                      controller: _maxBarCodeController,
+                                      maxLines: 3,
+                                      minLines: 1,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
+                                      ],
+                                      decoration: InputDecoration(
+                                          hintText: "如(箱码)",
+                                          hintStyle: TextStyle(
+                                              color: ColorUtil.GRAY_9,
+                                              fontSize: FontSizeUtil.MIDDLE),
+                                          border: const OutlineInputBorder(
+                                              borderSide: BorderSide.none)),
+                                    )),
+//                      SizedBox(
+//                        width: 30,
+//                        child: IconButton(
+//                            onPressed: () {
+//                            }, icon: const Icon(Icons.scanner)),
+//                      )
+                              ],
+                            )),
+                        Expanded(
+                            child: Row(
+                              children: [
+                                Text("条码(小):",
+                                    style: TextStyle(
+                                        color: ColorUtil.GRAY_6,
+                                        fontSize: FontSizeUtil.MIDDLE)),
+                                Expanded(
+                                    child: TextField(
+                                      controller: _minBarCodeController,
+                                      maxLines: 3,
+                                      minLines: 1,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.allow(
+                                            RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
+                                      ],
+                                      decoration: InputDecoration(
+                                          hintText: "如(瓶码)",
+                                          hintStyle: TextStyle(
+                                              color: ColorUtil.GRAY_9,
+                                              fontSize: FontSizeUtil.MIDDLE),
+                                          border: const OutlineInputBorder(
+                                              borderSide: BorderSide.none)),
+                                    )),
+//                      SizedBox(
+//                        width: 30,
+//                        child: IconButton(
+//                            onPressed: () {
+//                            }, icon: const Icon(Icons.scanner)),
+//                      )
+                              ],
+                            ))
+                      ],
+                    ),
+                  ),
+                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                  SizedBox(
+                    child: Row(
+                      children: [
+                        Text("大小单位换算比例:",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_6,
+                                fontSize: FontSizeUtil.MIDDLE)),
+                        Text("1",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_3, fontSize: FontSizeUtil.BIG)),
+                        Text("*大单位=",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_6,
+                                fontSize: FontSizeUtil.MIDDLE)),
+                        Expanded(
+                            child: TextField(
+                              controller: _sUnitController,
+                              keyboardType: TextInputType.number,
+                              decoration: InputDecoration(
+                                  hintText: "点击输入",
+                                  hintStyle: TextStyle(
+                                      color: ColorUtil.GRAY_9,
+                                      fontSize: FontSizeUtil.MIDDLE),
+                                  border: const OutlineInputBorder(
+                                      borderSide: BorderSide.none)),
+                            )),
+                        Text("*小单位",
+                            style: TextStyle(
+                                color: ColorUtil.GRAY_6,
+                                fontSize: FontSizeUtil.MIDDLE)),
+                      ],
+                    ),
+                  ),
+                ]
+              )
             ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
+            Offstage(
+              offstage: !btnInfo1,
+              child: Column(
                 children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("内部核算价(默认):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _innerAccPriceDefaultController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      )),
-                      Text("为空时默认采购价(大)",
-                          style: TextStyle(
-                              color: ColorUtil.RED,
-                              fontSize: FontSizeUtil.TIP_RED))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("最低销售价(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _lowestSalePriceController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("商品特征:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _wareFeaturesController,
-                        decoration: InputDecoration(
-                            hintText: "如：红色，白色，蓝色；(每组特征最多4个字)",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            Container(
-              height: 40,
-              alignment: Alignment.center,
-              child: TextButton(
-                  onPressed: () {},
-                  child: Text("商品辅助信息2" + StringUtil.ARROW_DOWN,
-                      style: TextStyle(
-                          color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG))),
-            ),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("保质期:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _qualityController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp("[0-9]"))
-                        ],
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      )),
-                      TextButton(
+                  Container(
+                    height: 40,
+                    alignment: Alignment.center,
+                    child: TextButton(
                         onPressed: () {
-                          _showDialogQuality(context);
+                          _showWareInfo1();
                         },
-                        child: Text(
-                          _quality + StringUtil.ARROW_DOWN,
-                          style: TextStyle(
-                              color: ColorUtil.BLUE,
-                              fontSize: FontSizeUtil.MIDDLE),
+                        child: Text("商品辅助信息1" + StringUtil.ARROW_DOWN,
+                            style: TextStyle(
+                                color: ColorUtil.BLUE,
+                                fontSize: FontSizeUtil.BIG))),
+                  ),
+                  Offstage(
+                    offstage: !viewInfo1,
+                    child:Column(
+                      children:[
+                        Offstage(
+                            offstage: !btnSortEdit,
+                            child: Column(children: [
+                              SizedBox(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Row(
+                                          children: [
+                                            Text("总排序(大):",
+                                                style: TextStyle(
+                                                    color: ColorUtil.GRAY_6,
+                                                    fontSize: FontSizeUtil.MIDDLE)),
+                                            SizedBox(
+                                              width: 50,
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    _showDialogLetter(context, true);
+                                                  },
+                                                  child: Text(
+                                                      _maxLetterSort.isNotEmpty
+                                                          ? _maxLetterSort +
+                                                          StringUtil.ARROW_DOWN
+                                                          : "选择" + StringUtil.ARROW_DOWN,
+                                                      style: TextStyle(
+                                                          color: ColorUtil.BLUE,
+                                                          fontSize:
+                                                          FontSizeUtil.MIDDLE))),
+                                            ),
+                                            Expanded(
+                                                child: TextField(
+                                                  controller: _maxSortController,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                      hintText: "输入",
+                                                      hintStyle: TextStyle(
+                                                          color: ColorUtil.GRAY_9,
+                                                          fontSize: FontSizeUtil.MIDDLE),
+                                                      border: const OutlineInputBorder(
+                                                          borderSide: BorderSide.none)),
+                                                ))
+                                          ],
+                                        )),
+                                    Expanded(
+                                        child: Row(
+                                          children: [
+                                            Text("总排序(小):",
+                                                style: TextStyle(
+                                                    color: ColorUtil.GRAY_6,
+                                                    fontSize: FontSizeUtil.MIDDLE)),
+                                            SizedBox(
+                                              width: 50,
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    _showDialogLetter(context, false);
+                                                  },
+                                                  child: Text(
+                                                      _minLetterSort.isNotEmpty
+                                                          ? _minLetterSort +
+                                                          StringUtil.ARROW_DOWN
+                                                          : "选择" + StringUtil.ARROW_DOWN,
+                                                      style: TextStyle(
+                                                          color: ColorUtil.BLUE,
+                                                          fontSize:
+                                                          FontSizeUtil.MIDDLE))),
+                                            ),
+                                            Expanded(
+                                                child: TextField(
+                                                  controller: _minSortController,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                      hintText: "输入",
+                                                      hintStyle: TextStyle(
+                                                          color: ColorUtil.GRAY_9,
+                                                          fontSize: FontSizeUtil.MIDDLE),
+                                                      border: const OutlineInputBorder(
+                                                          borderSide: BorderSide.none)),
+                                                ))
+                                          ],
+                                        )),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                        child: Row(
+                                          children: [
+                                            Text("分类排序:",
+                                                style: TextStyle(
+                                                    color: ColorUtil.GRAY_6,
+                                                    fontSize: FontSizeUtil.MIDDLE)),
+                                            Expanded(
+                                                child: TextField(
+                                                  controller: _wareTypeSortController,
+                                                  keyboardType: TextInputType.number,
+                                                  decoration: InputDecoration(
+                                                      hintText: "点击输入",
+                                                      hintStyle: TextStyle(
+                                                          color: ColorUtil.GRAY_9,
+                                                          fontSize: FontSizeUtil.MIDDLE),
+                                                      border: const OutlineInputBorder(
+                                                          borderSide: BorderSide.none)),
+                                                ))
+                                          ],
+                                        ))
+                                  ],
+                                ),
+                              ),
+                              Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                            ])),
+                        SizedBox(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("原价(大):",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _maxLsPriceController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                                hintText: "点击输入",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          ))
+                                    ],
+                                  )),
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("原价(小):",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _minLsPriceController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                                hintText: "点击输入",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          ))
+                                    ],
+                                  ))
+                            ],
+                          ),
                         ),
-                      )
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("保质期预警:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _qualityWarnController,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp("[0-9]"))
-                        ],
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      )),
-                      Text("天",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE))
-                    ],
-                  ))
+                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                        Offstage(
+                          offstage: !btnInPrice,
+                          child: Column(children: [
+                            SizedBox(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("采购价(大):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _maxInPriceController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              ))
+                                        ],
+                                      )),
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("采购价(小):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _minInPriceController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              ))
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                          ]),
+                        ),
+                        Offstage(
+                          offstage: !btnPfPrice,
+                          child: Column(children: [
+                            SizedBox(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("批发价(大):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _maxPfPriceController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              ))
+                                        ],
+                                      )),
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("批发价(小):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _minPfPriceController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              ))
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                          ]),
+                        ),
+                        Offstage(
+                          offstage: !btnInnerAccPriceDefault,
+                          child: Column(children: [
+                            SizedBox(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("内部核算价(默认):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _innerAccPriceDefaultController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              )),
+                                          Text("为空时默认采购价(大)",
+                                              style: TextStyle(
+                                                  color: ColorUtil.RED,
+                                                  fontSize: FontSizeUtil.TIP_RED))
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                          ]),
+                        ),
+                        Offstage(
+                          offstage: !btnLowestSalePrice,
+                          child: Column(children: [
+                            SizedBox(
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                      child: Row(
+                                        children: [
+                                          Text("最低销售价(大):",
+                                              style: TextStyle(
+                                                  color: ColorUtil.GRAY_6,
+                                                  fontSize: FontSizeUtil.MIDDLE)),
+                                          Expanded(
+                                              child: TextField(
+                                                controller: _lowestSalePriceController,
+                                                keyboardType: TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    hintText: "点击输入",
+                                                    hintStyle: TextStyle(
+                                                        color: ColorUtil.GRAY_9,
+                                                        fontSize: FontSizeUtil.MIDDLE),
+                                                    border: const OutlineInputBorder(
+                                                        borderSide: BorderSide.none)),
+                                              ))
+                                        ],
+                                      ))
+                                ],
+                              ),
+                            ),
+                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                          ]),
+                        ),
+                        SizedBox(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("商品特征:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _wareFeaturesController,
+                                            decoration: InputDecoration(
+                                                hintText: "如：红色，白色，蓝色；(每组特征最多4个字)",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          ))
+                                    ],
+                                  ))
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                      ]
+                    )
+                  ),
                 ],
               ),
             ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
+            Offstage(
+              offstage: !btnInfo2,
+              child: Column(
                 children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("供应商:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      TextButton(
-                          onPressed: () {
+                  Container(
+                    height: 40,
+                    alignment: Alignment.center,
+                    child: TextButton(
+                        onPressed: () {
+                          _showWareInfo2();
+                        },
+                        child: Text("商品辅助信息2" + StringUtil.ARROW_DOWN,
+                            style: TextStyle(
+                                color: ColorUtil.BLUE,
+                                fontSize: FontSizeUtil.BIG))),
+                  ),
+                  Offstage(
+                    offstage:!viewInfo2,
+                    child: Column(
+                      children:[
+                        SizedBox(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("保质期:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _qualityController,
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp("[0-9]"))
+                                            ],
+                                            decoration: InputDecoration(
+                                                hintText: "点击输入",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          )),
+                                      TextButton(
+                                        onPressed: () {
+                                          _showDialogQuality(context);
+                                        },
+                                        child: Text(
+                                          _quality + StringUtil.ARROW_DOWN,
+                                          style: TextStyle(
+                                              color: ColorUtil.BLUE,
+                                              fontSize: FontSizeUtil.MIDDLE),
+                                        ),
+                                      )
+                                    ],
+                                  )),
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("保质期预警:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _qualityWarnController,
+                                            keyboardType: TextInputType.number,
+                                            inputFormatters: [
+                                              FilteringTextInputFormatter.allow(
+                                                  RegExp("[0-9]"))
+                                            ],
+                                            decoration: InputDecoration(
+                                                hintText: "点击输入",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          )),
+                                      Text("天",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE))
+                                    ],
+                                  ))
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                        SizedBox(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("供应商:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      TextButton(
+                                          onPressed: () {
 //                            Navigator.of(context).pushNamed("choose_customer");
-                          },
-                          child: Text(_supName.isNotEmpty? _supName + StringUtil.ARROW_DOWN: "选择" + StringUtil.ARROW_DOWN,
-                              style: TextStyle(
-                                  color: ColorUtil.BLUE,
-                                  fontSize: FontSizeUtil.MIDDLE)))
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("商品品牌:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      TextButton(
-                          onPressed: () {
-                            _showDialogBrandList();
-                          },
-                          child: Text(_brandText.isNotEmpty? _brandText + StringUtil.ARROW_DOWN: "选择" + StringUtil.ARROW_DOWN,
-                              style: TextStyle(
-                                  color: ColorUtil.BLUE,
-                                  fontSize: FontSizeUtil.MIDDLE)))
-                    ],
-                  )),
+                                          },
+                                          child: Text(
+                                              _supName.isNotEmpty
+                                                  ? _supName + StringUtil.ARROW_DOWN
+                                                  : "选择" + StringUtil.ARROW_DOWN,
+                                              style: TextStyle(
+                                                  color: ColorUtil.BLUE,
+                                                  fontSize: FontSizeUtil.MIDDLE)))
+                                    ],
+                                  )),
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("商品品牌:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      TextButton(
+                                          onPressed: () {
+                                            _showDialogBrandList();
+                                          },
+                                          child: Text(
+                                              _brandText.isNotEmpty
+                                                  ? _brandText + StringUtil.ARROW_DOWN
+                                                  : "选择" + StringUtil.ARROW_DOWN,
+                                              style: TextStyle(
+                                                  color: ColorUtil.BLUE,
+                                                  fontSize: FontSizeUtil.MIDDLE)))
+                                    ],
+                                  )),
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                        SizedBox(
+                          child: Row(
+                            children: [
+                              Expanded(
+                                  child: Row(
+                                    children: [
+                                      Text("预警最低数量:",
+                                          style: TextStyle(
+                                              color: ColorUtil.GRAY_6,
+                                              fontSize: FontSizeUtil.MIDDLE)),
+                                      Expanded(
+                                          child: TextField(
+                                            controller: _warnQtyController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                                hintText: "点击输入",
+                                                hintStyle: TextStyle(
+                                                    color: ColorUtil.GRAY_9,
+                                                    fontSize: FontSizeUtil.MIDDLE),
+                                                border: const OutlineInputBorder(
+                                                    borderSide: BorderSide.none)),
+                                          ))
+                                    ],
+                                  ))
+                            ],
+                          ),
+                        ),
+                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+                      ]
+                    ),
+                  ),
                 ],
               ),
             ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("预警最低数量:",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _warnQtyController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                            hintText: "点击输入",
-                            hintStyle: TextStyle(
-                                color: ColorUtil.GRAY_9,
-                                fontSize: FontSizeUtil.MIDDLE),
-                            border: const OutlineInputBorder(
-                                borderSide: BorderSide.none)),
-                      ))
-                    ],
-                  ))
-                ],
+            Offstage(
+              offstage: !btnCustomerTypePrice,
+              child: Container(
+                height: 40,
+                alignment: Alignment.center,
+                child: TextButton(
+                    onPressed: () {},
+                    child: Text("查看客户类型价" + StringUtil.ARROW_DOWN,
+                        style: TextStyle(
+                            color: ColorUtil.BLUE,
+                            fontSize: FontSizeUtil.BIG))),
               ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            Container(
-              height: 40,
-              alignment: Alignment.center,
-              child: TextButton(
-                  onPressed: () {},
-                  child: Text("查看客户类型价" + StringUtil.ARROW_DOWN,
-                      style: TextStyle(
-                          color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG))),
             ),
           ],
         ),
@@ -1144,14 +1229,16 @@ class WareEditState extends State<WareEdit> {
   }
 
   List<BrandBean> _brandList = [];
-  void _showDialogBrandList() async{
-    if(_brandList.isEmpty){
+  void _showDialogBrandList() async {
+    if (_brandList.isEmpty) {
       FocusManager.instance.primaryFocus?.unfocus();
       LoadingDialogUtil.show();
-      var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list, options: Options(headers: {"token": ContainsUtil.token}));
+      var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list,
+          options: Options(headers: {"token": ContainsUtil.token}));
       LoadingDialogUtil.dismiss();
       print(response);
-      BrandListResult result = BrandListResult.fromJson(json.decode(response.toString()));
+      BrandListResult result =
+          BrandListResult.fromJson(json.decode(response.toString()));
       if (result.state!) {
         _brandList = result.data!;
       } else {
@@ -1159,15 +1246,15 @@ class WareEditState extends State<WareEdit> {
       }
     }
 
-    if(_brandList.isNotEmpty){
+    if (_brandList.isNotEmpty) {
       showDialog(
           context: context,
           builder: (_) => SimpleDialog(
-            title: Text("选择品牌",
-                style: TextStyle(
-                    color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG)),
-            children: getItemBrand(_brandList),
-          ));
+                title: Text("选择品牌",
+                    style: TextStyle(
+                        color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG)),
+                children: getItemBrand(_brandList),
+              ));
     }
   }
 
@@ -1399,22 +1486,37 @@ class WareEditState extends State<WareEdit> {
     });
   }
 
-  void _showDialogTip(String tip){
+  void _showDialogTip(String tip) {
     FocusManager.instance.primaryFocus?.unfocus();
     showDialog(
         context: context,
         builder: (context) {
           return AlertDialog(
-            title: Text('温馨提示', style: TextStyle(color: ColorUtil.GRAY_3, fontSize: FontSizeUtil.BIG)),
-            content: Text(tip, style: TextStyle(color: ColorUtil.RED, fontSize: FontSizeUtil.MIDDLE)),
+            title: Text('温馨提示',
+                style: TextStyle(
+                    color: ColorUtil.GRAY_3, fontSize: FontSizeUtil.BIG)),
+            content: Text(tip,
+                style: TextStyle(
+                    color: ColorUtil.RED, fontSize: FontSizeUtil.MIDDLE)),
             actions: <Widget>[
-              FlatButton(child: Text('取消', style: TextStyle(color: ColorUtil.GRAY_9, fontSize: FontSizeUtil.MIDDLE)),onPressed: (){
-                Navigator.pop(context);
-              },),
-              FlatButton(child: Text('确认', style: TextStyle(color: ColorUtil.BLUE, fontSize: FontSizeUtil.MIDDLE)),onPressed: (){
-                Navigator.pop(context);
-                _save(false);
-              },),
+              FlatButton(
+                child: Text('取消',
+                    style: TextStyle(
+                        color: ColorUtil.GRAY_9,
+                        fontSize: FontSizeUtil.MIDDLE)),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FlatButton(
+                child: Text('确认',
+                    style: TextStyle(
+                        color: ColorUtil.BLUE, fontSize: FontSizeUtil.MIDDLE)),
+                onPressed: () {
+                  Navigator.pop(context);
+                  _save(false);
+                },
+              ),
             ],
           );
         });
@@ -1478,7 +1580,7 @@ class WareEditState extends State<WareEdit> {
       "qualityAlert": qualityWarn,
       "warnQty": warnQty,
       "warePicList": _picList,
-      "brandId":_brandValue,
+      "brandId": _brandValue,
       "supId": _supId,
       "supName": _supName,
       "supType": _supType,
@@ -1501,63 +1603,85 @@ class WareEditState extends State<WareEdit> {
   }
 
   bool btnSave = false;
-  bool btnInfo1= false;
-  bool btnInfo2= false;
-  bool btnPfPrice= false;
-  bool btnInPrice= false;
-  bool btnInnerAccPriceDefault= false;
-  bool btnLowestSalePrice= false;
-  bool btnCustomerTypePrice= false;
-  bool btnUpdateCustomerTypePrice= false;
+  bool btnInfo1 = false;
+  bool btnInfo2 = false;
+  bool btnSortEdit = false;
+  bool btnPfPrice = false;
+  bool btnInPrice = false;
+  bool btnInnerAccPriceDefault = false;
+  bool btnLowestSalePrice = false;
+  bool btnCustomerTypePrice = false;
+  bool btnUpdateCustomerTypePrice = false;
+  bool viewInfo = true;
+  bool viewInfo1 = false;
+  bool viewInfo2 = false;
   Future<void> getMenuList() async {
-    if(add){
+    if (add) {
       btnSave = true;
     }
     LoadingDialogUtil.show();
-    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.menu_list, options: Options(headers: {"token": ContainsUtil.token}));
+    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.menu_list,
+        options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     print(response);
     MenuResult result = MenuResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
       List<MenuBean>? applyList = result.applyList;
-      if(applyList!.isNotEmpty){
+      if (applyList!.isNotEmpty) {
         //第一层
         applyList.forEach((apply) {
           List<MenuBean>? menuList = apply.children;
-          if(menuList!.isNotEmpty){
+          if (menuList!.isNotEmpty) {
             //第二层
             menuList.forEach((menu) {
-              if(MenuCodeUtil.ware_manager == menu.applyCode){
+              if (MenuCodeUtil.ware_manager == menu.applyCode) {
                 //第三层
                 List<MenuBean>? btnList = menu.children;
-                if(btnList!.isNotEmpty){
+                if (btnList!.isNotEmpty) {
                   setState(() {
                     btnList.forEach((btn) {
-                      if(!add && MenuCodeUtil.ware_manager_btn_update == btn.applyCode){
+                      if (!add &&
+                          MenuCodeUtil.ware_manager_btn_update ==
+                              btn.applyCode) {
                         btnSave = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_info1 == btn.applyCode){
+                      if (MenuCodeUtil.ware_manager_btn_info1 ==
+                          btn.applyCode) {
                         btnInfo1 = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_info2 == btn.applyCode){
+                      if (MenuCodeUtil.ware_manager_btn_info2 ==
+                          btn.applyCode) {
                         btnInfo2 = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_pf_price == btn.applyCode){
+                      if (MenuCodeUtil.ware_manager_btn_sort_edit ==
+                          btn.applyCode) {
+                        btnSortEdit = true;
+                      }
+                      if (MenuCodeUtil.ware_manager_btn_pf_price ==
+                          btn.applyCode) {
                         btnPfPrice = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_in_price == btn.applyCode){
+                      if (MenuCodeUtil.ware_manager_btn_in_price ==
+                          btn.applyCode) {
                         btnInPrice = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_inner_acc_price_default == btn.applyCode){
+                      if (MenuCodeUtil
+                              .ware_manager_btn_inner_acc_price_default ==
+                          btn.applyCode) {
                         btnInnerAccPriceDefault = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_lowest_sale_price == btn.applyCode){
+                      if (MenuCodeUtil.ware_manager_btn_lowest_sale_price ==
+                          btn.applyCode) {
                         btnLowestSalePrice = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_customer_type_price == btn.applyCode){
+                      if (!add &&
+                          MenuCodeUtil.ware_manager_btn_customer_type_price ==
+                              btn.applyCode) {
                         btnCustomerTypePrice = true;
                       }
-                      if(MenuCodeUtil.ware_manager_btn_update_customer_type_price == btn.applyCode){
+                      if (MenuCodeUtil
+                              .ware_manager_btn_update_customer_type_price ==
+                          btn.applyCode) {
                         btnUpdateCustomerTypePrice = true;
                       }
                     });
@@ -1572,6 +1696,28 @@ class WareEditState extends State<WareEdit> {
     } else {
       ToastUtil.error(result.msg);
     }
+  }
+
+  void  _showWareInfo(){
+    setState(() {
+      viewInfo = true;
+      viewInfo1 = false;
+      viewInfo2 = false;
+    });
+  }
+  void  _showWareInfo1(){
+    setState(() {
+      viewInfo = false;
+      viewInfo1 = true;
+      viewInfo2 = false;
+    });
+  }
+  void  _showWareInfo2(){
+    setState(() {
+      viewInfo = false;
+      viewInfo1 = false;
+      viewInfo2 = true;
+    });
   }
 
 }
