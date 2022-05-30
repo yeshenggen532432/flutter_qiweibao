@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutterqiweibao/ui/base/choose_customer.dart';
@@ -6,7 +5,7 @@ import 'package:flutterqiweibao/ui/ware_edit.dart';
 import 'dart:ui' as ui;
 
 void main() {
-  runApp( MyApp());
+  runApp(const MyApp());
   configLoading();
 }
 
@@ -36,13 +35,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-//      initialRoute: ui.window.defaultRouteName,
+      initialRoute: ui.window.defaultRouteName,
       routes: {
         "ware_edit": (context)=> const WareEdit(),
         "choose_customer": (context)=> const ChooseCustomer(),
       },
       builder: EasyLoading.init(),
-      home: const ChooseCustomer(),
+//      home: const WareEdit(),
     );
   }
 

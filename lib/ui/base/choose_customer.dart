@@ -49,7 +49,7 @@ class ChooseCustomerState extends State<ChooseCustomer> {
   void queryCustomerPage(customerTypes, page) async{
     LoadingDialogUtil.show();
     var data = {"size":"20","customerTypes":customerTypes,"loadingPeriod":"true","page":page,"loadingPicture":"true"};
-    var response = await Dio().get(UrlUtil.around_customer_page,
+    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.around_customer_page,
         queryParameters: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     logger.d(response);

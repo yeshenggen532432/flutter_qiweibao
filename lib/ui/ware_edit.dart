@@ -9,7 +9,7 @@ import 'package:flutterqiweibao/model/base_result.dart';
 import 'package:flutterqiweibao/model/pic_bean.dart';
 import 'package:flutterqiweibao/model/pic_result.dart';
 import 'package:flutterqiweibao/model/ware/ware.dart';
-import 'package:flutterqiweibao/model/ware/ware_intent%20.dart';
+import 'package:flutterqiweibao/model/ware/ware_edit_intent.dart';
 import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/tree/dialog/tree_ware_type_dialog.dart';
@@ -38,8 +38,8 @@ class WareEdit extends StatefulWidget {
 }
 
 class WareEditState extends State<WareEdit> {
-  bool add = false;
-  int? wareId = 123;
+  bool add = true;
+  int? wareId;
 
   @override
   void initState() {
@@ -51,13 +51,14 @@ class WareEditState extends State<WareEdit> {
   getIntent() async {
     _methodChannel.setMethodCallHandler(_methodChannelHandler);
     var map = await _methodChannel.invokeMethod("getIntent");
-    print("------------------------getIntent-----------------------:" +
-        map.toString());
+    print("------------------------getIntent-----------------------:" + map.toString());
 //    Map<String, dynamic> map = {"add": false, "wareId": 123};
     setState(() {
-      WareIntent wareIntent = WareIntent.fromJson(json.decode(map));
-      add = wareIntent.add!;
-      wareId = wareIntent.wareId;
+      WareEditIntent intent = WareEditIntent.fromJson(json.decode(map));
+      add = intent.add!;
+      wareId = intent.wareId;
+      ContainsUtil.token = intent.token!;
+      UrlUtil.ROOT = intent.baseUrl!;
       if (!add) {
         queryDetail();
       }
@@ -81,7 +82,7 @@ class WareEditState extends State<WareEdit> {
   Future<void> queryDetail() async {
     EasyLoading.show(status: "加载中...");
     Map<String, dynamic>? params = {"wareId": wareId};
-    var response = await Dio().get(UrlUtil.ware_detail,
+    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.ware_detail,
         queryParameters: params,
         options: Options(headers: {"token": ContainsUtil.token}));
     EasyLoading.dismiss();
@@ -153,16 +154,19 @@ class WareEditState extends State<WareEdit> {
     return Scaffold(
       appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios),
+            icon: const Icon(Icons.arrow_back_ios, size: 15),
             onPressed: () {
               Navigator.pop(context);
+              _methodChannel.invokeMethod("closeActivity");
             },
           ),
           title: Text(add ? "新建商品" : "修改商品")),
       bottomNavigationBar: Container(
         margin: const EdgeInsets.only(left: 10, right: 10),
         child: RaisedButton(
-            onPressed: _save,
+            onPressed: (){
+              _save(true);
+            },
             child: const Text("保存"),
             textColor: Colors.white,
             color: Colors.blue),
@@ -1127,7 +1131,7 @@ class WareEditState extends State<WareEdit> {
     if(_brandList.isEmpty){
       FocusManager.instance.primaryFocus?.unfocus();
       LoadingDialogUtil.show();
-      var response = await Dio().get(UrlUtil.brand_list, options: Options(headers: {"token": ContainsUtil.token}));
+      var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list, options: Options(headers: {"token": ContainsUtil.token}));
       LoadingDialogUtil.dismiss();
       logger.d(response);
       BrandListResult result = BrandListResult.fromJson(json.decode(response.toString()));
@@ -1298,7 +1302,7 @@ class WareEditState extends State<WareEdit> {
         child: RepaintBoundary(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(UrlUtil.ROOT_UPLOAD + pic.pic!,
+            child: Image.network(UrlUtil.ROOT + UrlUtil.ROOT_UPLOAD + pic.pic!,
                 fit: BoxFit.cover),
           ),
         ),
@@ -1328,7 +1332,7 @@ class WareEditState extends State<WareEdit> {
   void zoomPic(BuildContext context, final int index) {
     List<String> list = [];
     _picList.forEach((element) {
-      list.add(UrlUtil.ROOT_UPLOAD + element.pic!);
+      list.add(UrlUtil.ROOT + UrlUtil.ROOT_UPLOAD + element.pic!);
     });
     Navigator.push(
       context,
@@ -1348,7 +1352,7 @@ class WareEditState extends State<WareEdit> {
     map["path"] = "ware";
     map["file"] = await MultipartFile.fromFile(filePath);
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.upload_pic_single,
+    var response = await dio.post(UrlUtil.ROOT + UrlUtil.upload_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     logger.d(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
@@ -1365,7 +1369,7 @@ class WareEditState extends State<WareEdit> {
     Map<String, dynamic> map = {};
     map["object"] = filePath;
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.del_pic_single,
+    var response = await dio.post(UrlUtil.ROOT + UrlUtil.del_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     logger.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
@@ -1378,7 +1382,28 @@ class WareEditState extends State<WareEdit> {
     });
   }
 
-  Future<void> _save() async {
+  void _showDialogTip(String tip){
+    FocusManager.instance.primaryFocus?.unfocus();
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text('温馨提示', style: TextStyle(color: ColorUtil.GRAY_3, fontSize: FontSizeUtil.BIG)),
+            content: Text(tip, style: TextStyle(color: ColorUtil.RED, fontSize: FontSizeUtil.MIDDLE)),
+            actions: <Widget>[
+              FlatButton(child: Text('取消', style: TextStyle(color: ColorUtil.GRAY_9, fontSize: FontSizeUtil.MIDDLE)),onPressed: (){
+                Navigator.pop(context);
+              },),
+              FlatButton(child: Text('确认', style: TextStyle(color: ColorUtil.BLUE, fontSize: FontSizeUtil.MIDDLE)),onPressed: (){
+                Navigator.pop(context);
+                _save(false);
+              },),
+            ],
+          );
+        });
+  }
+
+  Future<void> _save(barCodeTip) async {
     String wareName = _wareNameController.text;
     String maxUnit = _maxUnitController.text;
     String minUnit = _minUnitController.text;
@@ -1405,7 +1430,7 @@ class WareEditState extends State<WareEdit> {
 
     var data = {
       "wareId": _wareId,
-      "barCodeTip": true,
+      "barCodeTip": barCodeTip,
       "businessType": _businessType,
       "waretype": _wareType,
       "wareNm": wareName,
@@ -1436,19 +1461,21 @@ class WareEditState extends State<WareEdit> {
       "qualityAlert": qualityWarn,
       "warnQty": warnQty,
       "warePicList": _picList,
-//  "brandId":,
+      "brandId":_brandValue,
 //    "supId": 1032,
 //    "supName": "上海梅林泰康食品有限公司制造",
 //    "supType": 0,
     };
 
     LoadingDialogUtil.show();
-    var response = await Dio().post(UrlUtil.WARE_SAVE,
+    var response = await Dio().post(UrlUtil.ROOT + UrlUtil.WARE_SAVE,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     logger.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
-    if (result.state!) {
+    if (100 == result.code) {
+      _showDialogTip(result.message!);
+    } else if (result.state!) {
       ToastUtil.success("保存成功");
       _methodChannel.invokeMethod("closeActivity");
     } else {

@@ -62,7 +62,7 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
     params["isType"] = widget.isType;
 
     var response = await Dio().get(
-        UrlUtil.WARE_TYPE_TREE,
+        UrlUtil.ROOT + UrlUtil.WARE_TYPE_TREE,
         queryParameters: params,
         options:
           Options(headers: {"token": ContainsUtil.token})
