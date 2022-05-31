@@ -170,7 +170,8 @@ class WareEditState extends State<WareEdit> {
           ),
           title: Text(add ? "新建商品" : "修改商品")),
       bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10),
+        height: 40,
+        margin: const EdgeInsets.all(10),
         child: Offstage(
           offstage: !btnSave,
           child: RaisedButton(
@@ -307,6 +308,8 @@ class WareEditState extends State<WareEdit> {
                       child: TextField(
                           controller: _wareNameController,
                           decoration: const InputDecoration(
+                              isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                              contentPadding:  EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                               hintText: "请输入商品名称",
                               hintStyle: TextStyle(
                                   color: Color(0xFF999999), fontSize: 13),
@@ -330,6 +333,8 @@ class WareEditState extends State<WareEdit> {
                           child: TextField(
                         controller: _maxUnitController,
                         decoration: const InputDecoration(
+                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                           hintText: "如箱",
                           hintStyle:
                               TextStyle(color: Color(0xFF999999), fontSize: 12),
@@ -350,6 +355,8 @@ class WareEditState extends State<WareEdit> {
                           child: TextField(
                         controller: _minUnitController,
                         decoration: const InputDecoration(
+                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                           hintText: "如瓶",
                           hintStyle:
                               TextStyle(color: Color(0xFf999999), fontSize: 12),
@@ -383,6 +390,8 @@ class WareEditState extends State<WareEdit> {
                                     child: TextField(
                                       controller: _maxWareGgUnitController,
                                       decoration: const InputDecoration(
+                                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                           hintText: "如500ml*6",
                                           hintStyle: TextStyle(
                                               color: Color(0xff999999), fontSize: 13),
@@ -404,6 +413,8 @@ class WareEditState extends State<WareEdit> {
                                     child: TextField(
                                       controller: _minWareGgUnitController,
                                       decoration: const InputDecoration(
+                                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                           hintText: "如500ml",
                                           hintStyle: TextStyle(
                                               color: Color(0xff999999), fontSize: 13),
@@ -438,6 +449,8 @@ class WareEditState extends State<WareEdit> {
                                             RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
                                       ],
                                       decoration: InputDecoration(
+                                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                           hintText: "如(箱码)",
                                           hintStyle: TextStyle(
                                               color: ColorUtil.GRAY_9,
@@ -470,6 +483,8 @@ class WareEditState extends State<WareEdit> {
                                             RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
                                       ],
                                       decoration: InputDecoration(
+                                          isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                           hintText: "如(瓶码)",
                                           hintStyle: TextStyle(
                                               color: ColorUtil.GRAY_9,
@@ -508,6 +523,8 @@ class WareEditState extends State<WareEdit> {
                               controller: _sUnitController,
                               keyboardType: TextInputType.number,
                               decoration: InputDecoration(
+                                  isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                   hintText: "点击输入",
                                   hintStyle: TextStyle(
                                       color: ColorUtil.GRAY_9,
@@ -579,6 +596,8 @@ class WareEditState extends State<WareEdit> {
                                                   controller: _maxSortController,
                                                   keyboardType: TextInputType.number,
                                                   decoration: InputDecoration(
+                                                      isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                       hintText: "输入",
                                                       hintStyle: TextStyle(
                                                           color: ColorUtil.GRAY_9,
@@ -616,6 +635,8 @@ class WareEditState extends State<WareEdit> {
                                                   controller: _minSortController,
                                                   keyboardType: TextInputType.number,
                                                   decoration: InputDecoration(
+                                                      isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                       hintText: "输入",
                                                       hintStyle: TextStyle(
                                                           color: ColorUtil.GRAY_9,
@@ -643,6 +664,8 @@ class WareEditState extends State<WareEdit> {
                                                   controller: _wareTypeSortController,
                                                   keyboardType: TextInputType.number,
                                                   decoration: InputDecoration(
+                                                      isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                      contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                       hintText: "点击输入",
                                                       hintStyle: TextStyle(
                                                           color: ColorUtil.GRAY_9,
@@ -672,6 +695,8 @@ class WareEditState extends State<WareEdit> {
                                             controller: _maxLsPriceController,
                                             keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "点击输入",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,
@@ -693,6 +718,8 @@ class WareEditState extends State<WareEdit> {
                                             controller: _minLsPriceController,
                                             keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "点击输入",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,
@@ -724,6 +751,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _maxInPriceController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -745,6 +774,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _minInPriceController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -778,6 +809,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _maxPfPriceController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -799,6 +832,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _minPfPriceController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -832,6 +867,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _innerAccPriceDefaultController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -869,6 +906,8 @@ class WareEditState extends State<WareEdit> {
                                                 controller: _lowestSalePriceController,
                                                 keyboardType: TextInputType.number,
                                                 decoration: InputDecoration(
+                                                    isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                    contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                     hintText: "点击输入",
                                                     hintStyle: TextStyle(
                                                         color: ColorUtil.GRAY_9,
@@ -898,6 +937,8 @@ class WareEditState extends State<WareEdit> {
                                           child: TextField(
                                             controller: _wareFeaturesController,
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "如：红色，白色，蓝色；(每组特征最多4个字)",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,
@@ -956,6 +997,8 @@ class WareEditState extends State<WareEdit> {
                                                   RegExp("[0-9]"))
                                             ],
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "点击输入",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,
@@ -992,6 +1035,8 @@ class WareEditState extends State<WareEdit> {
                                                   RegExp("[0-9]"))
                                             ],
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "点击输入",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,
@@ -1071,6 +1116,8 @@ class WareEditState extends State<WareEdit> {
                                             controller: _warnQtyController,
                                             keyboardType: TextInputType.number,
                                             decoration: InputDecoration(
+                                                isCollapsed: true,//重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
+                                                contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),//内容内边距，影响⾼度
                                                 hintText: "点击输入",
                                                 hintStyle: TextStyle(
                                                     color: ColorUtil.GRAY_9,

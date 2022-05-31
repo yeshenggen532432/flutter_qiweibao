@@ -1,7 +1,7 @@
 class UrlUtil{
 
-//  static String ROOT = "http://ysg.dev.skadoosh.cn/";
-  static String ROOT = "http://mp.qweib.com/";
+  static String ROOT = "http://ysg.dev.skadoosh.cn/";
+//  static String ROOT = "http://mp.qweib.com/";
 
   static String ROOT_UPLOAD = "/upload/";
 
