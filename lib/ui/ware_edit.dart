@@ -1066,6 +1066,7 @@ class WareEditState extends State<WareEdit> {
                                               fontSize: FontSizeUtil.MIDDLE)),
                                       TextButton(
                                           onPressed: () {
+                                            ToastUtil.normal("暂无实现");
 //                            Navigator.of(context).pushNamed("choose_customer");
                                           },
                                           child: Text(
@@ -1143,7 +1144,9 @@ class WareEditState extends State<WareEdit> {
                 height: 40,
                 alignment: Alignment.center,
                 child: TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      ToastUtil.normal("暂无实现");
+                    },
                     child: Text("查看客户类型价" + StringUtil.ARROW_DOWN,
                         style: TextStyle(
                             color: ColorUtil.BLUE,

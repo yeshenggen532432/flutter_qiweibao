@@ -35,13 +35,13 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-//      initialRoute: ui.window.defaultRouteName,
+      initialRoute: ui.window.defaultRouteName,
       routes: {
         "ware_edit": (context)=> const WareEdit(),
         "choose_customer": (context)=> const ChooseCustomer(),
       },
       builder: EasyLoading.init(),
-      home: const WareEdit(),
+//      home: const ChooseCustomer(),
     );
   }
 

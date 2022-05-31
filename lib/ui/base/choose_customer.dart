@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/model/customer/customer_bean.dart';
 import 'package:flutterqiweibao/model/customer/customer_page_result.dart';
@@ -12,7 +11,6 @@ import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
 import 'package:flutterqiweibao/utils/url_util.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ChooseCustomer extends StatefulWidget {
 
@@ -32,7 +30,6 @@ class ChooseCustomerState extends State<ChooseCustomer> {
 //    Tab(text: '其他往来单位')
   ];
 
-  RefreshController _refreshController = RefreshController(initialRefresh: false);
 
   @override
   void initState() {
@@ -67,9 +64,7 @@ class ChooseCustomerState extends State<ChooseCustomer> {
             _customerList = [];
             break;
         }
-        _refreshController.refreshCompleted();
       }else{
-        _refreshController.loadComplete();
       }
       setState(() {
         switch(customerTypes){
@@ -125,25 +120,28 @@ class ChooseCustomerState extends State<ChooseCustomer> {
                   )
               ),
             ),
-            SmartRefresher(
-              enablePullDown: true,
-              enablePullUp: true,
-              header: WaterDropHeader(),
-              controller: _refreshController,
-              onRefresh: (){
+            RefreshIndicator(
+              onRefresh: () async {
                 _pageNoSup = 1;
                 queryCustomerPage("0", _pageNoSup);
               },
-              onLoading: (){
-                _pageNoSup +=1;
-                queryCustomerPage("0", _pageNoSup);
-              },
               child: ListView.builder(
+                shrinkWrap: true,
                 itemBuilder: (c, i) => _buildItem(c,i),
                 itemExtent: 40,
-                itemCount: _customerList.length,
+                itemCount: _customerSupList.length,
               ),
-            ),
+           ),
+//            RefreshIndicator(child: ListView.builder(
+//              shrinkWrap: true,
+//              itemBuilder: (c, i) => _buildItem(c,i),
+//              itemExtent: 40,
+//              itemCount: _customerSupList.length,
+//            ), onRefresh: (){
+//
+//          }),
+
+
           ],
         ),
       ]),
@@ -151,7 +149,7 @@ class ChooseCustomerState extends State<ChooseCustomer> {
   }
 
   Widget _buildItem(BuildContext context, int index) {
-    final CustomerBean item = _customerList[index];
+    final CustomerBean item = _customerSupList[index];
     return Card(child: Center(child: Text(item.khNm!)));
   }
 
