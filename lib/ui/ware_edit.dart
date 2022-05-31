@@ -15,7 +15,6 @@ import 'package:flutterqiweibao/model/ware/ware_edit_intent.dart';
 import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/tree/dialog/tree_ware_type_dialog.dart';
-import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/ui/photo_view_wrapper.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
@@ -46,7 +45,6 @@ class WareEditState extends State<WareEdit> {
 
   @override
   void initState() {
-    getMenuList();
     getIntent();
     super.initState();
   }
@@ -64,6 +62,7 @@ class WareEditState extends State<WareEdit> {
       wareId = intent.wareId;
       ContainsUtil.token = intent.token!;
       UrlUtil.ROOT = intent.baseUrl!;
+      getMenuList();
       if (!add) {
         queryDetail();
       }
@@ -113,6 +112,7 @@ class WareEditState extends State<WareEdit> {
       _maxWareGgUnitController.text = ware.wareGg!;
       _minWareGgUnitController.text = ware.minWareGg!;
       _maxBarCodeController.text = ware.packBarCode!;
+      _minBarCodeController.text = ware.beBarCode!;
       _sUnitController.text = ware.sUnit != null ? ware.sUnit.toString() : "";
       _maxLetterSort = ware.sortCode!;
       _maxSortController.text = ware.sort != null ? ware.sort.toString() : "";
