@@ -4,6 +4,8 @@ import 'package:flutterqiweibao/ui/base/choose_customer.dart';
 import 'package:flutterqiweibao/ui/ware_edit.dart';
 import 'dart:ui' as ui;
 
+import 'package:pull_to_refresh/pull_to_refresh.dart';
+
 void main() {
   runApp(const MyApp());
   configLoading();
@@ -30,19 +32,23 @@ class MyApp extends StatelessWidget {
   const MyApp({Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: '企微宝',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
+    return RefreshConfiguration(
+        footerTriggerDistance: 15,
+        dragSpeedRatio: 0.91,
+        headerBuilder: () => WaterDropHeader(),
+        footerBuilder: () => ClassicFooter(),
+        child: MaterialApp(
+          title: '企微宝',
+          theme: ThemeData(
+            primarySwatch: Colors.blue,
+          ),
 //      initialRoute: ui.window.defaultRouteName,
-      routes: {
-        "ware_edit": (context)=> const WareEdit(),
-        "choose_customer": (context)=> const ChooseCustomer(),
-      },
-      builder: EasyLoading.init(),
-      home: const WareEdit(),
-    );
+          routes: {
+            "ware_edit": (context) => const WareEdit(),
+            "choose_customer": (context) => const ChooseCustomer(),
+          },
+          builder: EasyLoading.init(),
+          home: const WareEdit(),
+        ));
   }
-
 }

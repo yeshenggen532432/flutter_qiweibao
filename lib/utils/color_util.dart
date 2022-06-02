@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class ColorUtil{
   static Color LINE_GRAY = Color(0xFFEEEEEE);
+  static Color edit_box_gray = Color(0xFFaaaaaa);
   static Color RED = Colors.red;
   static Color green = Colors.green;
   static Color BLUE = Colors.blue;
