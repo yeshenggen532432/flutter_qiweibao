@@ -5,6 +5,7 @@ import 'package:flutterqiweibao/ui/ware_edit.dart';
 import 'dart:ui' as ui;
 
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 void main() {
   runApp(const MyApp());
@@ -49,6 +50,23 @@ class MyApp extends StatelessWidget {
           },
           builder: EasyLoading.init(),
           home: const WareEdit(),
+          localizationsDelegates: [
+            RefreshLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate
+          ],
+          supportedLocales: [
+            const Locale('en'),
+            const Locale('zh'),
+          ],
+          locale: const Locale('zh'),
+//          localeResolutionCallback:
+//              (Locale locale, Iterable<Locale> supportedLocales) {
+//            //print("change language");
+//            return locale;
+//          },
         ));
+
   }
 }

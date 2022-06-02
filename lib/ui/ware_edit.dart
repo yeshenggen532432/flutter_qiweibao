@@ -56,12 +56,13 @@ class WareEditState extends State<WareEdit> {
       _methodChannel.setMethodCallHandler(_methodChannelHandler);
       var map = await _methodChannel.invokeMethod("getIntent");
       WareEditIntent intent = WareEditIntent.fromJson(json.decode(map));
-      add = intent.add!;
-      wareId = intent.wareId;
-      ContainsUtil.token = intent.token!;
-      UrlUtil.ROOT = intent.baseUrl!;
+      setState(() {
+        add = intent.add!;
+        wareId = intent.wareId;
+        ContainsUtil.token = intent.token!;
+        UrlUtil.ROOT = intent.baseUrl!;
+      });
     }
-
     setState(() {
       getMenuList();
       if (!add) {
