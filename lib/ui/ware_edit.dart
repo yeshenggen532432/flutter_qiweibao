@@ -73,12 +73,10 @@ class WareEditState extends State<WareEdit> {
 
   /// 原生 调用 Flutter的结果回调
   Future<String> _methodChannelHandler(MethodCall call) async {
-    print(
-        "---------------_methodChannelHandler------------------------ method = ${call.method}");
     switch (call.method) {
-      case "callFlutter":
+      case "setScan":
         setState(() {
-          _isTypeText = call.arguments.toString();
+          _maxBarCodeController.text = call.arguments.toString();
         });
         break;
     }
@@ -473,12 +471,15 @@ class WareEditState extends State<WareEdit> {
                                   border: const OutlineInputBorder(
                                       borderSide: BorderSide.none)),
                             )),
-//                      SizedBox(
-//                        width: 30,
-//                        child: IconButton(
-//                            onPressed: () {
-//                            }, icon: const Icon(Icons.scanner)),
-//                      )
+                      SizedBox(
+                        width: 25,
+                        child: GestureDetector(
+                          onTap: (){
+                            _methodChannel.invokeMethod("getScan", true);
+                          },
+                          child:Image.asset("assets/images/ic_scan_blue.png")
+                        ),
+                      )
                           ],
                         )),
                         Expanded(
