@@ -76,7 +76,14 @@ class WareEditState extends State<WareEdit> {
     switch (call.method) {
       case "setScan":
         setState(() {
-          _maxBarCodeController.text = call.arguments.toString();
+          String arguments = call.arguments.toString();
+          Map<String, dynamic> map = json.decode(arguments);
+          bool max = map["max"];
+          if(max){
+            _maxBarCodeController.text = map["barcode"];
+          }else{
+            _minBarCodeController.text = map["barcode"];
+          }
         });
         break;
     }
@@ -471,15 +478,16 @@ class WareEditState extends State<WareEdit> {
                                   border: const OutlineInputBorder(
                                       borderSide: BorderSide.none)),
                             )),
-                      SizedBox(
-                        width: 25,
-                        child: GestureDetector(
-                          onTap: (){
-                            _methodChannel.invokeMethod("getScan", true);
-                          },
-                          child:Image.asset("assets/images/ic_scan_blue.png")
-                        ),
-                      )
+                            SizedBox(
+                              width: 25,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    _methodChannel.invokeMethod(
+                                        "getScan", true);
+                                  },
+                                  child: Image.asset(
+                                      "assets/images/ic_scan_blue.png")),
+                            )
                           ],
                         )),
                         Expanded(
@@ -510,12 +518,16 @@ class WareEditState extends State<WareEdit> {
                                   border: const OutlineInputBorder(
                                       borderSide: BorderSide.none)),
                             )),
-//                      SizedBox(
-//                        width: 30,
-//                        child: IconButton(
-//                            onPressed: () {
-//                            }, icon: const Icon(Icons.scanner)),
-//                      )
+                            SizedBox(
+                              width: 25,
+                              child: GestureDetector(
+                                  onTap: () {
+                                    _methodChannel.invokeMethod(
+                                        "getScan", false);
+                                  },
+                                  child: Image.asset(
+                                      "assets/images/ic_scan_blue.png")),
+                            )
                           ],
                         ))
                       ],
@@ -1247,10 +1259,8 @@ class WareEditState extends State<WareEdit> {
    * 选择供应商
    */
   void _chooseSup(BuildContext context) {
-    Navigator.of(context)
-        .pushNamed("choose_customer")
-        .then((value) {
-      SupBean sup = SupBean.fromJson( json.decode(value.toString()));
+    Navigator.of(context).pushNamed("choose_customer").then((value) {
+      SupBean sup = SupBean.fromJson(json.decode(value.toString()));
       print(sup.supName);
       setState(() {
         _supId = sup.supId;
