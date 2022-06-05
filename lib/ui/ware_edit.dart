@@ -5,6 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:flutterqiweibao/model/base/brand_bean.dart';
 import 'package:flutterqiweibao/model/base/brand_list_result.dart';
+import 'package:flutterqiweibao/model/base/customer_type_price_bean.dart';
+import 'package:flutterqiweibao/model/base/customer_type_price_result.dart';
 import 'package:flutterqiweibao/model/base/menu_bean.dart';
 import 'package:flutterqiweibao/model/base/menu_result.dart';
 import 'package:flutterqiweibao/model/base/sup_bean.dart';
@@ -42,7 +44,7 @@ class WareEdit extends StatefulWidget {
 
 class WareEditState extends State<WareEdit> {
   bool add = true;
-  int? wareId;
+  int? wareId = 2420;
 
   @override
   void initState() {
@@ -79,9 +81,9 @@ class WareEditState extends State<WareEdit> {
           String arguments = call.arguments.toString();
           Map<String, dynamic> map = json.decode(arguments);
           bool max = map["max"];
-          if(max){
+          if (max) {
             _maxBarCodeController.text = map["barcode"];
-          }else{
+          } else {
             _minBarCodeController.text = map["barcode"];
           }
         });
@@ -1241,7 +1243,7 @@ class WareEditState extends State<WareEdit> {
                 alignment: Alignment.center,
                 child: TextButton(
                     onPressed: () {
-                      ToastUtil.normal("暂无实现");
+                      _showDialogCustomerTypePrice();
                     },
                     child: Text("查看客户类型价" + StringUtil.ARROW_DOWN,
                         style: TextStyle(
@@ -1771,7 +1773,7 @@ class WareEditState extends State<WareEdit> {
   bool btnInPrice = false;
   bool btnInnerAccPriceDefault = false;
   bool btnLowestSalePrice = false;
-  bool btnCustomerTypePrice = false;
+  bool btnCustomerTypePrice = true;
   bool btnUpdateCustomerTypePrice = false;
   bool viewInfo = true;
   bool viewInfo1 = false;
@@ -1881,5 +1883,219 @@ class WareEditState extends State<WareEdit> {
       viewInfo1 = false;
       viewInfo2 = true;
     });
+  }
+
+  Future<void> getCustomerTypePriceList() async {
+    LoadingDialogUtil.show();
+    var response = await Dio().get(
+        UrlUtil.ROOT + UrlUtil.customer_type_price_list,
+        queryParameters: {"wareId": wareId},
+        options: Options(headers: {"token": ContainsUtil.token}));
+    LoadingDialogUtil.dismiss();
+    print(response);
+    CustomerTypePriceResult result =
+    CustomerTypePriceResult.fromJson(json.decode(response.toString()));
+    if (result.state!) {
+      _customerTypePriceList = [];
+      _customerTypePriceList.addAll(result.data!);
+    } else {
+      ToastUtil.error(result.msg);
+    }
+  }
+
+  List<CustomerTypePriceBean> _customerTypePriceList = [];
+  _showDialogCustomerTypePrice() async {
+   getCustomerTypePriceList();
+
+    if (_customerTypePriceList.isNotEmpty) {
+      return showDialog<String>(
+          context: context,
+          builder: (context) {
+            return Dialog(
+              child: Column(
+                children: [
+                  Container(
+                    height: 50,
+                    alignment: Alignment.center,
+                    child: Text(
+                      '客户类型价',
+                      style: TextStyle(color: ColorUtil.Blue, fontSize: 18),
+                    ),
+                  ),
+                  Divider(
+                    color: ColorUtil.LINE_GRAY,
+                    height: 1,
+                  ),
+                  Offstage(
+                    offstage: false,
+                    child: Container(
+                      height: 40,
+                      alignment: Alignment.center,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Container(
+                              margin: const EdgeInsets.only(left: 5),
+                              child: Text("输入框离开焦点自动保存，保存最后一个要点别的输入框",
+                                  style: TextStyle(
+                                      color: Colors.red, fontSize: 9)),
+                            ),
+                          ),
+                          Container(
+                            width: 70,
+                            alignment: Alignment.center,
+                            margin: const EdgeInsets.only(right: 5, bottom: 5),
+                            child:
+                                TextButton(onPressed: () {}, child: Text("笔")),
+                          ),
+                          Container(
+                            width: 70,
+                            alignment: Alignment.center,
+                            margin: const EdgeInsets.only(right: 5, bottom: 5),
+                            child:
+                                TextButton(onPressed: () {}, child: Text("笔")),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                      child: ListView.builder(
+                          itemCount: _customerTypePriceList.length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    margin: const EdgeInsets.only(left: 5),
+                                    child: Text(_customerTypePriceList[index]
+                                        .customerTypeName!),
+                                  ),
+                                ),
+                                CustomerTypePriceEdit(
+                                  max:true,
+                                    wareId:wareId!,
+                                    customerTypeId:
+                                        _customerTypePriceList[index]
+                                            .customerTypeId!,
+                                    value: _customerTypePriceList[index]
+                                                .maxPrice ==
+                                            null
+                                        ? ""
+                                        : _customerTypePriceList[index]
+                                            .maxPrice
+                                            .toString()),
+                                CustomerTypePriceEdit(
+                                  max:false,
+                                    wareId:wareId!,
+                                    customerTypeId:
+                                        _customerTypePriceList[index]
+                                            .customerTypeId!,
+                                    value: _customerTypePriceList[index]
+                                                .minPrice ==
+                                            null
+                                        ? ""
+                                        : _customerTypePriceList[index]
+                                            .minPrice
+                                            .toString()),
+                              ],
+                            );
+                          })),
+                ],
+              ),
+            );
+          });
+    }
+  }
+}
+
+class CustomerTypePriceEdit extends StatefulWidget {
+  String value;
+  int customerTypeId;
+  int wareId;
+  bool max;
+  CustomerTypePriceEdit(
+      {Key? key,
+      required this.max,
+      required this.value,
+      required this.customerTypeId,
+      required this.wareId})
+      : super(key: key);
+
+  @override
+  State<StatefulWidget> createState() {
+    return CustomerTypePriceEditState();
+  }
+}
+
+class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
+    with AutomaticKeepAliveClientMixin {
+  TextEditingController _controller = TextEditingController();
+  FocusNode _focusNode = FocusNode();
+
+  @override
+  bool get wantKeepAlive => true; //关键代码：重写get wantKeepAlive并设置为true
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.text = widget.value;
+    _focusNode.addListener(() {
+      if (!_focusNode.hasFocus) {
+        print("失去焦点");
+        print(_controller.text);
+        String field = "wareDj";
+        if(widget.max){
+          field = "wareDj";
+        }
+        _updateCustomerTypePrice(
+            _controller.text, field, widget.customerTypeId, widget.wareId);
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 70,
+      margin: const EdgeInsets.only(bottom: 5, right: 5),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(5),
+        border: Border.all(color: Colors.red, width: 1), //边框
+      ),
+      child: TextField(
+          controller: _controller,
+          focusNode: _focusNode,
+          decoration: InputDecoration(
+            isCollapsed: true,
+            contentPadding: EdgeInsets.all(8),
+            hintStyle: TextStyle(color: Colors.black, fontSize: 15),
+            border: OutlineInputBorder(borderSide: BorderSide.none),
+          )),
+    );
+  }
+
+  Future<void> _updateCustomerTypePrice(
+      String price, String field, int customerTypeId, int wareId) async {
+    LoadingDialogUtil.show();
+    var data = {
+      "price": price,
+      "field": field,
+      "customerTypeId": customerTypeId,
+      "wareId": wareId
+    };
+    print(data);
+    var response =
+        await Dio().post(UrlUtil.ROOT + UrlUtil.update_customer_type_price,
+            data: data ,
+            options: Options(headers: {"token": ContainsUtil.token}));
+    LoadingDialogUtil.dismiss();
+    print(response);
+    BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
+    if (result.state!) {
+      ToastUtil.success("修改成功");
+    } else {
+      ToastUtil.error(result.msg);
+    }
   }
 }
