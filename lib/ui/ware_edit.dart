@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,7 @@ import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
+import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/menu_code_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
@@ -100,7 +102,7 @@ class WareEditState extends State<WareEdit> {
         queryParameters: params,
         options: Options(headers: {"token": ContainsUtil.token}));
     EasyLoading.dismiss();
-    print(response);
+    LogUtil.d(response);
     WareResult result = WareResult.fromJson(json.decode(response.toString()));
     if (result.state != null && result.state == true) {
       doUI(result.sysWare!);
@@ -1263,14 +1265,14 @@ class WareEditState extends State<WareEdit> {
    */
   void _chooseSup(BuildContext context) {
     Navigator.of(context).pushNamed("choose_customer").then((value) {
-      SupBean sup = SupBean.fromJson(json.decode(value.toString()));
-      print(sup.supName);
-      setState(() {
-        _supId = sup.supId;
-        _supType = sup.supType;
-        _supName = sup.supName!;
-      });
+    SupBean sup = SupBean.fromJson(json.decode(value.toString()));
+    LogUtil.d(sup.supName);
+    setState(() {
+      _supId = sup.supId;
+      _supType = sup.supType;
+      _supName = sup.supName!;
     });
+  });
   }
 
   String _businessType = "0";
@@ -1400,7 +1402,7 @@ class WareEditState extends State<WareEdit> {
       var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list,
           options: Options(headers: {"token": ContainsUtil.token}));
       LoadingDialogUtil.dismiss();
-      print(response);
+      LogUtil.d(response);
       BrandListResult result =
           BrandListResult.fromJson(json.decode(response.toString()));
       if (result.state!) {
@@ -1559,7 +1561,7 @@ class WareEditState extends State<WareEdit> {
           return BottomDialog(
             list: [ "拍照", "相册"],
             onChanged: (int index) {
-              print(index);
+              LogUtil.d(index);
               if( 0 == index){
                 _imagePickerByCamera();
               }else{
@@ -1645,7 +1647,7 @@ class WareEditState extends State<WareEdit> {
     var data = FormData.fromMap(map);
     var response = await dio.post(UrlUtil.ROOT + UrlUtil.upload_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
-    print(response);
+    LogUtil.d(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
     setState(() {
       EasyLoading.dismiss();
@@ -1662,7 +1664,7 @@ class WareEditState extends State<WareEdit> {
     var data = FormData.fromMap(map);
     var response = await dio.post(UrlUtil.ROOT + UrlUtil.del_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
-    print(response);
+    LogUtil.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     setState(() {
       if (result.state != null && result.state == true) {
@@ -1777,7 +1779,7 @@ class WareEditState extends State<WareEdit> {
     var response = await Dio().post(UrlUtil.ROOT + UrlUtil.WARE_SAVE,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     if (100 == result.code) {
       _showDialogTip(result.message!);
@@ -1810,7 +1812,7 @@ class WareEditState extends State<WareEdit> {
     var response = await Dio().get(UrlUtil.ROOT + UrlUtil.menu_list,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     MenuResult result = MenuResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
       List<MenuBean>? applyList = result.applyList;
@@ -1916,7 +1918,7 @@ class WareEditState extends State<WareEdit> {
         queryParameters: {"wareId": wareId},
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     CustomerTypePriceResult result =
         CustomerTypePriceResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
@@ -1936,7 +1938,7 @@ class WareEditState extends State<WareEdit> {
         queryParameters: {"wareId": wareId},
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     CustomerTypePriceResult result =
     CustomerTypePriceResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
@@ -2097,7 +2099,7 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
     _controller.text = widget.value;
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
-        print("失去焦点:" + _controller.text);
+        LogUtil.d("失去焦点:" + _controller.text);
         String field = "minSalePrice";
         if (widget.max) {
           field = "salePrice";
@@ -2143,13 +2145,12 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
       "customerTypeId": customerTypeId,
       "wareId": wareId
     };
-    print(data);
     var response = await Dio().post(
         UrlUtil.ROOT + UrlUtil.update_customer_type_price,
         queryParameters: data,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
       ToastUtil.success("修改成功");

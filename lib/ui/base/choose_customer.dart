@@ -9,6 +9,7 @@ import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
+import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
 import 'package:flutterqiweibao/utils/url_util.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -39,7 +40,7 @@ class ChooseCustomerState extends State<ChooseCustomer>
     _tabController.addListener(() {
       //点击tab回调一次，滑动切换tab不会回调
       if (_tabController.index.toDouble() == _tabController.animation!.value) {
-        print("ysl${_tabController.index}");
+        LogUtil.d("ysl${_tabController.index}");
       }
     });
     queryCustomerPage("0", 1);
@@ -86,7 +87,7 @@ class ChooseCustomerState extends State<ChooseCustomer>
         queryParameters: data,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    print(response);
+    LogUtil.d(response);
     CustomerPageResult result =
         CustomerPageResult.fromJson(json.decode(response.toString()));
     List<CustomerBean> list = result.data!.rows!;
