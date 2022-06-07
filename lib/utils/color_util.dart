@@ -10,4 +10,5 @@ class ColorUtil{
   static Color GRAY_3 = const Color(0xFF333333);
   static Color GRAY_6 = const Color(0xFF666666);
   static Color GRAY_9 = const Color(0xFF999999);
+  static Color hint_gray = const Color(0xFF999999);
 }

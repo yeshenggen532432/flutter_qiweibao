@@ -44,7 +44,7 @@ class WareEdit extends StatefulWidget {
 
 class WareEditState extends State<WareEdit> {
   bool add = true;
-  int? wareId = 2420;
+  int? wareId;
 
   @override
   void initState() {
@@ -1773,7 +1773,7 @@ class WareEditState extends State<WareEdit> {
   bool btnInPrice = false;
   bool btnInnerAccPriceDefault = false;
   bool btnLowestSalePrice = false;
-  bool btnCustomerTypePrice = true;
+  bool btnCustomerTypePrice = false;
   bool btnUpdateCustomerTypePrice = false;
   bool viewInfo = true;
   bool viewInfo1 = false;
@@ -1894,7 +1894,7 @@ class WareEditState extends State<WareEdit> {
     LoadingDialogUtil.dismiss();
     print(response);
     CustomerTypePriceResult result =
-    CustomerTypePriceResult.fromJson(json.decode(response.toString()));
+        CustomerTypePriceResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
       _customerTypePriceList = [];
       _customerTypePriceList.addAll(result.data!);
@@ -1905,7 +1905,22 @@ class WareEditState extends State<WareEdit> {
 
   List<CustomerTypePriceBean> _customerTypePriceList = [];
   _showDialogCustomerTypePrice() async {
-   getCustomerTypePriceList();
+//    getCustomerTypePriceList();----TODO 为什么第二次才生效
+    LoadingDialogUtil.show();
+    var response = await Dio().get(
+        UrlUtil.ROOT + UrlUtil.customer_type_price_list,
+        queryParameters: {"wareId": wareId},
+        options: Options(headers: {"token": ContainsUtil.token}));
+    LoadingDialogUtil.dismiss();
+    print(response);
+    CustomerTypePriceResult result =
+    CustomerTypePriceResult.fromJson(json.decode(response.toString()));
+    if (result.state!) {
+      _customerTypePriceList = [];
+      _customerTypePriceList.addAll(result.data!);
+    } else {
+      ToastUtil.error(result.msg);
+    }
 
     if (_customerTypePriceList.isNotEmpty) {
       return showDialog<String>(
@@ -1919,7 +1934,8 @@ class WareEditState extends State<WareEdit> {
                     alignment: Alignment.center,
                     child: Text(
                       '客户类型价',
-                      style: TextStyle(color: ColorUtil.Blue, fontSize: 18),
+                      style: TextStyle(
+                          color: ColorUtil.BLUE, fontSize: FontSizeUtil.BIG),
                     ),
                   ),
                   Divider(
@@ -1927,7 +1943,7 @@ class WareEditState extends State<WareEdit> {
                     height: 1,
                   ),
                   Offstage(
-                    offstage: false,
+                    offstage: !btnUpdateCustomerTypePrice,
                     child: Container(
                       height: 40,
                       alignment: Alignment.center,
@@ -1938,23 +1954,34 @@ class WareEditState extends State<WareEdit> {
                               margin: const EdgeInsets.only(left: 5),
                               child: Text("输入框离开焦点自动保存，保存最后一个要点别的输入框",
                                   style: TextStyle(
-                                      color: Colors.red, fontSize: 9)),
+                                      color: ColorUtil.RED,
+                                      fontSize: FontSizeUtil.SMALL)),
                             ),
                           ),
-                          Container(
-                            width: 70,
-                            alignment: Alignment.center,
-                            margin: const EdgeInsets.only(right: 5, bottom: 5),
-                            child:
-                                TextButton(onPressed: () {}, child: Text("笔")),
-                          ),
-                          Container(
-                            width: 70,
-                            alignment: Alignment.center,
-                            margin: const EdgeInsets.only(right: 5, bottom: 5),
-                            child:
-                                TextButton(onPressed: () {}, child: Text("笔")),
-                          ),
+//                          Container(
+//                            width: 70,
+//                            alignment: Alignment.center,
+//                            margin: const EdgeInsets.only(right: 5, bottom: 5),
+//                            child: TextButton(
+//                                onPressed: () {
+//                                },
+//                                child: Text("✎",
+//                                    style: TextStyle(
+//                                        color: ColorUtil.BLUE,
+//                                        fontSize: FontSizeUtil.BIG))),
+//                          ),
+//                          Container(
+//                            width: 70,
+//                            alignment: Alignment.center,
+//                            margin: const EdgeInsets.only(right: 5, bottom: 5),
+//                            child: TextButton(
+//                                onPressed: () {
+//                                },
+//                                child: Text("✎",
+//                                    style: TextStyle(
+//                                        color: ColorUtil.BLUE,
+//                                        fontSize: FontSizeUtil.BIG))),
+//                          ),
                         ],
                       ),
                     ),
@@ -1973,30 +2000,32 @@ class WareEditState extends State<WareEdit> {
                                   ),
                                 ),
                                 CustomerTypePriceEdit(
-                                  max:true,
-                                    wareId:wareId!,
+                                  enable: btnUpdateCustomerTypePrice,
+                                    max: true,
+                                    wareId: wareId!,
                                     customerTypeId:
                                         _customerTypePriceList[index]
                                             .customerTypeId!,
                                     value: _customerTypePriceList[index]
-                                                .maxPrice ==
+                                                .salePrice ==
                                             null
                                         ? ""
                                         : _customerTypePriceList[index]
-                                            .maxPrice
+                                            .salePrice
                                             .toString()),
                                 CustomerTypePriceEdit(
-                                  max:false,
-                                    wareId:wareId!,
+                                  enable: btnUpdateCustomerTypePrice,
+                                    max: false,
+                                    wareId: wareId!,
                                     customerTypeId:
                                         _customerTypePriceList[index]
                                             .customerTypeId!,
                                     value: _customerTypePriceList[index]
-                                                .minPrice ==
+                                                .minSalePrice ==
                                             null
                                         ? ""
                                         : _customerTypePriceList[index]
-                                            .minPrice
+                                            .minSalePrice
                                             .toString()),
                               ],
                             );
@@ -2014,11 +2043,13 @@ class CustomerTypePriceEdit extends StatefulWidget {
   int customerTypeId;
   int wareId;
   bool max;
+  bool enable = false;
   CustomerTypePriceEdit(
       {Key? key,
       required this.max,
       required this.value,
       required this.customerTypeId,
+      required this.enable,
       required this.wareId})
       : super(key: key);
 
@@ -2042,11 +2073,10 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
     _controller.text = widget.value;
     _focusNode.addListener(() {
       if (!_focusNode.hasFocus) {
-        print("失去焦点");
-        print(_controller.text);
-        String field = "wareDj";
-        if(widget.max){
-          field = "wareDj";
+        print("失去焦点:" + _controller.text);
+        String field = "minSalePrice";
+        if (widget.max) {
+          field = "salePrice";
         }
         _updateCustomerTypePrice(
             _controller.text, field, widget.customerTypeId, widget.wareId);
@@ -2061,15 +2091,20 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
       margin: const EdgeInsets.only(bottom: 5, right: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: Colors.red, width: 1), //边框
+        border: Border.all(color: ColorUtil.edit_box_gray, width: 1), //边框
       ),
       child: TextField(
+          enabled: widget.enable,
           controller: _controller,
           focusNode: _focusNode,
-          decoration: InputDecoration(
+          style: TextStyle(color: widget.enable? ColorUtil.GRAY_3: ColorUtil.GRAY_9),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(
+                RegExp("[0-9]"))
+          ],
+          decoration: const InputDecoration(
             isCollapsed: true,
             contentPadding: EdgeInsets.all(8),
-            hintStyle: TextStyle(color: Colors.black, fontSize: 15),
             border: OutlineInputBorder(borderSide: BorderSide.none),
           )),
     );
@@ -2085,10 +2120,10 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
       "wareId": wareId
     };
     print(data);
-    var response =
-        await Dio().post(UrlUtil.ROOT + UrlUtil.update_customer_type_price,
-            data: data ,
-            options: Options(headers: {"token": ContainsUtil.token}));
+    var response = await Dio().post(
+        UrlUtil.ROOT + UrlUtil.update_customer_type_price,
+        queryParameters: data,
+        options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     print(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));

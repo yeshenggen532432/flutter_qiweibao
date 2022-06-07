@@ -1,7 +1,7 @@
 class UrlUtil{
 
-//  static String ROOT = "http://ysg.dev.skadoosh.cn/";
-  static String ROOT = "http://mp.qweib.com/";
+  static String ROOT = "http://ysg.dev.skadoosh.cn/";
+//  static String ROOT = "http://mp.qweib.com/";
 
   static String ROOT_UPLOAD = "/upload/";
 
@@ -14,8 +14,8 @@ class UrlUtil{
   static String ware_detail = "/web/basic/bas_ware/detail";//商品详情
   static String WARE_TYPE_TREE = "/web/basic/bas_ware_type/list_ware_type_group";//商品分类
   static String brand_list = "/web/basic/bas_brand/list";//商品品牌
-  static String customer_type_price_list = "/web/basic/bas_customer_type/customer_type_prices";//客户类型价格
-  static String update_customer_type_price = "/web/basic/bas_customer_type/update_customer_type_ware_price";//客户类型价格:修改
+  static String customer_type_price_list = "/web/setting/price/price_customer_type_ware/get_ware_prices";//客户类型价格
+  static String update_customer_type_price = "/web/setting/price/price_customer_type_ware/update_field";//客户类型价格:修改
   static String around_customer_page = "/web/basic/customer/around";//周边客户
 
 }
