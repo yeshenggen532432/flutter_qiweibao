@@ -123,7 +123,7 @@ class _FlutterTreeProState extends State<FlutterTreePro> {
   };
 
   /// @params
-  /// @desc expand map tree to map
+  /// @desc expand map widget.tree to map
   Map treeMap = {};
 
   @override
@@ -166,7 +166,7 @@ class _FlutterTreeProState extends State<FlutterTreePro> {
   }
 
   /// @params
-  /// @desc expand tree data to map
+  /// @desc expand widget.tree data to map
   factoryTreeData(treeModel) {
     treeModel['open'] = false;
     treeModel['checked'] = 0;

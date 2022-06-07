@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/model/base/sup_bean.dart';
 import 'package:flutterqiweibao/model/customer/customer_bean.dart';
 import 'package:flutterqiweibao/model/customer/customer_page_result.dart';
-import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
@@ -87,7 +86,7 @@ class ChooseCustomerState extends State<ChooseCustomer>
         queryParameters: data,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
-    logger.d(response);
+    print(response);
     CustomerPageResult result =
         CustomerPageResult.fromJson(json.decode(response.toString()));
     List<CustomerBean> list = result.data!.rows!;

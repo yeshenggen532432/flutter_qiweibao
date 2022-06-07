@@ -36,7 +36,7 @@ class DataUtil {
   }
 
   /// @params
-  /// @desc expand tree map
+  /// @desc expand widget.tree map
   Map<String, dynamic> expandMap(Map<String, dynamic> dataMap, Config config) {
     dataMap['open'] = false;
     dataMap['checked'] = 0;

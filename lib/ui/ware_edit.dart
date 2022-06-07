@@ -17,8 +17,6 @@ import 'package:flutterqiweibao/model/ware/ware.dart';
 import 'package:flutterqiweibao/model/ware/ware_edit_intent.dart';
 import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
-import 'package:flutterqiweibao/tree/dialog/tree_ware_type_dialog.dart';
-import 'package:flutterqiweibao/ui/photo_view_wrapper.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
@@ -29,6 +27,9 @@ import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
 import 'package:flutterqiweibao/utils/url_util.dart';
 import 'package:flutterqiweibao/utils/ware_is_type_util.dart';
+import 'package:flutterqiweibao/widget/photo/photo_view_wrapper.dart';
+import 'package:flutterqiweibao/widget/tree/dialog/tree_ware_type_dialog.dart';
+import '../widget/dialog/bottom_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../utils/method_channel_util.dart';
@@ -206,7 +207,7 @@ class WareEditState extends State<WareEdit> {
                         alignment: Alignment.center,
                         child: IconButton(
                             onPressed: () {
-                              _imagePickerByCamera();
+                              showDialogPic();
                             },
                             icon: const Icon(Icons.photo_camera)),
                       ),
@@ -1551,9 +1552,32 @@ class WareEditState extends State<WareEdit> {
     });
   }
 
+  void showDialogPic(){
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return BottomDialog(
+            list: [ "拍照", "相册"],
+            onChanged: (int index) {
+              print(index);
+              if( 0 == index){
+                _imagePickerByCamera();
+              }else{
+                _imagePickerByGallery();
+              }
+            },
+          );
+        });
+  }
+
   void _imagePickerByCamera() async {
     ImagePicker _picker = ImagePicker();
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
+    uploadPic(photo!.path);
+  }
+  void _imagePickerByGallery() async {
+    ImagePicker _picker = ImagePicker();
+    final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
     uploadPic(photo!.path);
   }
 

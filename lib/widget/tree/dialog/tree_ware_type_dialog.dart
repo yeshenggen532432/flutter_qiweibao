@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:flutterqiweibao/tree/tree.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/url_util.dart';
+import 'package:flutterqiweibao/widget/tree/tree.dart';
 
 class TreeWareTypeDialog extends Dialog {
   String isType;
