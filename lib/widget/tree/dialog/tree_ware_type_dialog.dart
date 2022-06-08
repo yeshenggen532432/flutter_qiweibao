@@ -59,7 +59,7 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
     params["showKindType"] = showKindType;
     params["showServiceType"] = showServiceType;
     params["businessType"] = widget.businessType;
-    params["isType"] = widget.isType;
+    params["isType"] = widget.isType == "4"? "0": widget.isType;//联盟商品类-传“库存商品类”的值
 
     var response = await Dio().get(
         UrlUtil.ROOT + UrlUtil.WARE_TYPE_TREE,
