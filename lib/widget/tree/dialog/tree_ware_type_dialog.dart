@@ -3,8 +3,10 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
+import 'package:flutterqiweibao/utils/http/http_manager.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
-import 'package:flutterqiweibao/utils/url_util.dart';
+import 'package:flutterqiweibao/utils/toast_util.dart';
+import '../../../utils/http/url_manager.dart';
 import 'package:flutterqiweibao/widget/tree/tree.dart';
 
 class TreeWareTypeDialog extends Dialog {
@@ -43,7 +45,7 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
   }
 
   loadData() async {
-    LoadingDialogUtil.show();
+
     bool showKindType = true;
     bool showServiceType = false;
     if(widget.businessType=="1"){
@@ -61,21 +63,29 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
     params["businessType"] = widget.businessType;
     params["isType"] = widget.isType == "4"? "0": widget.isType;//联盟商品类-传“库存商品类”的值
 
+    LoadingDialogUtil.show();
     var response = await Dio().get(
-        UrlUtil.ROOT + UrlUtil.WARE_TYPE_TREE,
+        UrlManager.ROOT + UrlManager.WARE_TYPE_TREE,
         queryParameters: params,
         options:
           Options(headers: {"token": ContainsUtil.token})
         );
     LoadingDialogUtil.dismiss();
+    Map<String, dynamic> map = response.data;
+
+//    Map<String, dynamic> map = HttpManager.getInstance().get(UrlManager.WARE_TYPE_TREE, params:params);
     setState(() {
       data.clear();
-      json.decode(response.toString())['data'].forEach((item){
-        item['waretypePid']=-1;
-        item['waretypeId']=0;
-        data.add(item);
-        addData(item['typeList']);
-      });
+      if(null != map && map["state"]){
+        map['data'].forEach((item){
+          item['waretypePid']=-1;
+          item['waretypeId']=0;
+          data.add(item);
+          addData(item['typeList']);
+        });
+      }else{
+        ToastUtil.error(map["msg"]);
+      }
     });
   }
 

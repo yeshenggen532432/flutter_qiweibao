@@ -11,7 +11,7 @@ import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
-import 'package:flutterqiweibao/utils/url_util.dart';
+import '../../utils/http/url_manager.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class ChooseCustomer extends StatefulWidget {
@@ -83,7 +83,7 @@ class ChooseCustomerState extends State<ChooseCustomer>
       "page": page,
       "loadingPicture": "true"
     };
-    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.around_customer_page,
+    var response = await Dio().get(UrlManager.ROOT + UrlManager.around_customer_page,
         queryParameters: data,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();

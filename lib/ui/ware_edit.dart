@@ -21,13 +21,14 @@ import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
+import 'package:flutterqiweibao/utils/http/http_manager.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/menu_code_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
-import 'package:flutterqiweibao/utils/url_util.dart';
+import '../utils/http/url_manager.dart';
 import 'package:flutterqiweibao/utils/ware_is_type_util.dart';
 import 'package:flutterqiweibao/widget/photo/photo_view_wrapper.dart';
 import 'package:flutterqiweibao/widget/tree/dialog/tree_ware_type_dialog.dart';
@@ -65,7 +66,7 @@ class WareEditState extends State<WareEdit> {
         add = intent.add!;
         wareId = intent.wareId;
         ContainsUtil.token = intent.token!;
-        UrlUtil.ROOT = intent.baseUrl!;
+        UrlManager.ROOT = intent.baseUrl!;
       });
     }
     setState(() {
@@ -98,7 +99,7 @@ class WareEditState extends State<WareEdit> {
   Future<void> queryDetail() async {
     EasyLoading.show(status: "加载中...");
     Map<String, dynamic>? params = {"wareId": wareId};
-    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.ware_detail,
+    var response = await Dio().get(UrlManager.ROOT + UrlManager.ware_detail,
         queryParameters: params,
         options: Options(headers: {"token": ContainsUtil.token}));
     EasyLoading.dismiss();
@@ -1399,7 +1400,7 @@ class WareEditState extends State<WareEdit> {
     if (_brandList.isEmpty) {
       FocusManager.instance.primaryFocus?.unfocus();
       LoadingDialogUtil.show();
-      var response = await Dio().get(UrlUtil.ROOT + UrlUtil.brand_list,
+      var response = await Dio().get(UrlManager.ROOT + UrlManager.brand_list,
           options: Options(headers: {"token": ContainsUtil.token}));
       LoadingDialogUtil.dismiss();
       LogUtil.d(response);
@@ -1595,7 +1596,7 @@ class WareEditState extends State<WareEdit> {
         child: RepaintBoundary(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(UrlUtil.ROOT + UrlUtil.ROOT_UPLOAD + pic.pic!,
+            child: Image.network(UrlManager.ROOT + UrlManager.ROOT_UPLOAD + pic.pic!,
                 fit: BoxFit.cover),
           ),
         ),
@@ -1625,7 +1626,7 @@ class WareEditState extends State<WareEdit> {
   void zoomPic(BuildContext context, final int index) {
     List<String> list = [];
     _picList.forEach((element) {
-      list.add(UrlUtil.ROOT + UrlUtil.ROOT_UPLOAD + element.pic!);
+      list.add(UrlManager.ROOT + UrlManager.ROOT_UPLOAD + element.pic!);
     });
     Navigator.push(
       context,
@@ -1645,7 +1646,7 @@ class WareEditState extends State<WareEdit> {
     map["path"] = "ware";
     map["file"] = await MultipartFile.fromFile(filePath);
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.ROOT + UrlUtil.upload_pic_single,
+    var response = await dio.post(UrlManager.ROOT + UrlManager.upload_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LogUtil.d(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
@@ -1662,7 +1663,7 @@ class WareEditState extends State<WareEdit> {
     Map<String, dynamic> map = {};
     map["object"] = filePath;
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlUtil.ROOT + UrlUtil.del_pic_single,
+    var response = await dio.post(UrlManager.ROOT + UrlManager.del_pic_single,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LogUtil.d(response);
     BaseResult result = BaseResult.fromJson(json.decode(response.toString()));
@@ -1776,7 +1777,7 @@ class WareEditState extends State<WareEdit> {
     };
 
     LoadingDialogUtil.show();
-    var response = await Dio().post(UrlUtil.ROOT + UrlUtil.WARE_SAVE,
+    var response = await Dio().post(UrlManager.ROOT + UrlManager.WARE_SAVE,
         data: data, options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     LogUtil.d(response);
@@ -1809,11 +1810,16 @@ class WareEditState extends State<WareEdit> {
       btnSave = true;
     }
     LoadingDialogUtil.show();
-    var response = await Dio().get(UrlUtil.ROOT + UrlUtil.menu_list,
+    var response = await Dio().get(UrlManager.ROOT + UrlManager.menu_list,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
     LogUtil.d(response);
-    MenuResult result = MenuResult.fromJson(json.decode(response.toString()));
+    Map<String, dynamic> map = response.data;
+
+//    Map<String, dynamic> map =  await HttpManager.getInstance().get(UrlManager.menu_list);
+
+    MenuResult result = MenuResult.fromJson(map);
+    LogUtil.d(result);
     if (result.state!) {
       List<MenuBean>? applyList = result.applyList;
       if (applyList!.isNotEmpty) {
@@ -1914,7 +1920,7 @@ class WareEditState extends State<WareEdit> {
   Future<void> getCustomerTypePriceList() async {
     LoadingDialogUtil.show();
     var response = await Dio().get(
-        UrlUtil.ROOT + UrlUtil.customer_type_price_list,
+        UrlManager.ROOT + UrlManager.customer_type_price_list,
         queryParameters: {"wareId": wareId},
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
@@ -1934,7 +1940,7 @@ class WareEditState extends State<WareEdit> {
 //    getCustomerTypePriceList();----TODO 为什么第二次才生效
     LoadingDialogUtil.show();
     var response = await Dio().get(
-        UrlUtil.ROOT + UrlUtil.customer_type_price_list,
+        UrlManager.ROOT + UrlManager.customer_type_price_list,
         queryParameters: {"wareId": wareId},
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
@@ -2146,7 +2152,7 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
       "wareId": wareId
     };
     var response = await Dio().post(
-        UrlUtil.ROOT + UrlUtil.update_customer_type_price,
+        UrlManager.ROOT + UrlManager.update_customer_type_price,
         queryParameters: data,
         options: Options(headers: {"token": ContainsUtil.token}));
     LoadingDialogUtil.dismiss();
