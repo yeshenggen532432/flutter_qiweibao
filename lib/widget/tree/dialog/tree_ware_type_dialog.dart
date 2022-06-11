@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
+import 'package:flutterqiweibao/utils/http/api_manager.dart';
 import 'package:flutterqiweibao/utils/http/http_manager.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
@@ -63,17 +64,19 @@ class TreeWareTypeState extends State<TreeWareTypeContent>{
     params["businessType"] = widget.businessType;
     params["isType"] = widget.isType == "4"? "0": widget.isType;//联盟商品类-传“库存商品类”的值
 
-    LoadingDialogUtil.show();
-    var response = await Dio().get(
-        UrlManager.ROOT + UrlManager.WARE_TYPE_TREE,
-        queryParameters: params,
-        options:
-          Options(headers: {"token": ContainsUtil.token})
-        );
-    LoadingDialogUtil.dismiss();
-    Map<String, dynamic> map = response.data;
+//    LoadingDialogUtil.show();
+//    var response = await Dio().get(
+//        UrlManager.ROOT + UrlManager.WARE_TYPE_TREE,
+//        queryParameters: params,
+//        options:
+//          Options(headers: {"token": ContainsUtil.token})
+//        );
+//    LoadingDialogUtil.dismiss();
+//    Map<String, dynamic> map = response.data;
 
+    //备注不要少了：await；不然会报错：type 'Future<dynamic>' is not a subtype of type 'Map<String, dynamic>'
 //    Map<String, dynamic> map = HttpManager.getInstance().get(UrlManager.WARE_TYPE_TREE, params:params);
+    Map<String, dynamic> map  = await ApiManager.getInstance().getWareTypeTree(params);
     setState(() {
       data.clear();
       if(null != map && map["state"]){

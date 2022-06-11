@@ -30,7 +30,11 @@ class HttpManager{
     return _instance;
   }
 
-  ///通用的GET请求
+  /**
+   * 通用的GET请求
+   * 备注使用时不要少了：await；不然会报错：type 'Future<dynamic>' is not a subtype of type 'Map<String, dynamic>'
+      Map<String, dynamic> map = await HttpManager.getInstance().get(UrlManager.WARE_TYPE_TREE, params:params);
+   */
   get(api, {params, withLoading = true}) async {
     if (withLoading) {
       LoadingDialogUtil.show();
@@ -54,26 +58,29 @@ class HttpManager{
   }
 
 
-  ///通用的POST请求
-  post(api, {params, withLoading = true}) async {
+  //通用的POST请求
+  post(api, {data, params, withLoading = true}) async {
     if (withLoading) {
       LoadingDialogUtil.show();
     }
 
     Response response;
     try {
-      response = await _dio!.post(api, data: params);
-      if (withLoading) {
-        LoadingDialogUtil.dismiss();
+      if(data){
+        response = await _dio!.post(api, data: data);
+      }else if(params){
+        response = await _dio!.post(api, queryParameters: params);
+      }else{
+        response = await _dio!.post(api);
       }
     } on DioError catch (e) {
-      return resultError(e);
+      return resultError(e).toJson();
     }finally{
       if (withLoading) {
         LoadingDialogUtil.dismiss();
       }
     }
-    return response.toString();
+    return response.data;
   }
 
   BaseResult resultError(DioError e) {
