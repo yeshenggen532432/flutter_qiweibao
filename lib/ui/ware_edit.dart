@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,24 +17,24 @@ import 'package:flutterqiweibao/model/ware/ware.dart';
 import 'package:flutterqiweibao/model/ware/ware_edit_intent.dart';
 import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
+import 'package:flutterqiweibao/template/base_template.dart';
+import 'package:flutterqiweibao/template/row_template.dart';
+import 'package:flutterqiweibao/template/ware/ware_edit_template.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
-import 'package:flutterqiweibao/utils/http/http_manager.dart';
+import 'package:flutterqiweibao/utils/http/url_manager.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/menu_code_util.dart';
+import 'package:flutterqiweibao/utils/method_channel_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
-import 'package:flutterqiweibao/utils/string_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
-import '../utils/http/url_manager.dart';
+import 'package:flutterqiweibao/widget/dialog/bottom_dialog.dart';
 import 'package:flutterqiweibao/utils/ware_is_type_util.dart';
 import 'package:flutterqiweibao/widget/photo/photo_view_wrapper.dart';
 import 'package:flutterqiweibao/widget/tree/dialog/tree_ware_type_dialog.dart';
-import '../widget/dialog/bottom_dialog.dart';
 import 'package:image_picker/image_picker.dart';
-
-import '../utils/method_channel_util.dart';
 
 class WareEdit extends StatefulWidget {
   const WareEdit({Key? key}) : super(key: key);
@@ -54,6 +53,266 @@ class WareEditState extends State<WareEdit> {
   void initState() {
     getIntent();
     super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+          leading: TitleBackView(methodChannel: _methodChannel),
+          title: Text(add ? "新建商品" : "修改商品")),
+      bottomNavigationBar: Offstage(
+        offstage: !btnSave,
+        child: ButtonEdit(
+          "保存",
+          onClick: () {
+            _save(true);
+          },
+        ),
+      ),
+      body: Container(
+        margin: const EdgeInsets.only(left: 10, right: 10),
+        color: Colors.white,
+        child: ListView(
+          children: [
+            Offstage(
+                offstage: !viewInfo,
+                child: Column(children: [
+                  SizedBox(
+                    child: Column(children: [
+                      Container(
+                        alignment: Alignment.center,
+                        child: IconButton(
+                            onPressed: () {
+                              showDialogPic();
+                            },
+                            icon: const Icon(Icons.photo_camera)),
+                      ),
+                      Offstage(
+                        offstage: _picList.isEmpty ? true : false,
+                        child: GridView.builder(
+                            shrinkWrap: true,
+                            scrollDirection: Axis.vertical,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount: _picList.length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 5,
+                              mainAxisSpacing: 5,
+                              crossAxisSpacing: 5,
+                            ),
+                            itemBuilder: (_, position) => _picItem(position)),
+                      )
+                    ]),
+                  ),
+                  RowLabelMenu(
+                      label: "商品总类:",
+                      onClick: () {
+                        _showDialogWareIsType(context);
+                      },
+                      menuValue: _isTypeText),
+                  RowLabelTwoRadio(
+                      label: "商品类别属性:",
+                      groupValue: _businessType,
+                      leftRadioValue: "0",
+                      onLeftChanged:
+                          !add ? null : (value) => _changeRadioValue(value),
+                      leftLabel: "实物商品",
+                      rightRadioValue: "1",
+                      onRightChanged:
+                          !add ? null : (value) => _changeRadioValue(value),
+                      rightLabel: "服务商品"),
+                  RowLabelMenu(
+                      label: "商品类别:",
+                      onClick: () {
+                        _showDialogWareType(context);
+                      },
+                      menuValue: _wareTypeText),
+                ])),
+            RowButton("商品基础信息", appendDown: true, onClick: () {
+              _showWareInfo();
+            }),
+            RowLabelEdit(
+                controller: _wareNameController,
+                label: "商品名称:",
+                hint: "请输入商品名称"),
+            RowTwoLabelEdit(
+              leftController: _maxUnitController,
+              leftLabel: "单位(大):",
+              leftHint: "如箱",
+              rightController: _minUnitController,
+              rightLabel: "单位(小):",
+              rightHint: "如瓶",
+            ),
+            Offstage(
+                offstage: !viewInfo,
+                child: Column(children: [
+                  RowTwoLabelEdit(
+                    leftController: _maxWareGgUnitController,
+                    leftLabel: "规格(大):",
+                    leftHint: "如500ml*6",
+                    rightController: _minWareGgUnitController,
+                    rightLabel: "规格(小):",
+                    rightHint: "如500ml",
+                  ),
+                  RowTwoLabelEditIcon(
+                      leftController: _maxBarCodeController,
+                      leftLabel: "条码(大):",
+                      leftHint: "如(箱码)",
+                      onLeftClick: () {
+                        _methodChannel.invokeMethod("getScan", true);
+                      },
+                      leftIcon: Image.asset("assets/images/ic_scan_blue.png"),
+                      rightController: _minBarCodeController,
+                      rightLabel: "条码(小):",
+                      rightHint: "如(瓶码)",
+                      onRightClick: () {
+                        _methodChannel.invokeMethod("getScan", false);
+                      },
+                      rightIcon: Image.asset("assets/images/ic_scan_blue.png")),
+                  RowLabelTwoEditLabel(
+                      label: "大小单位换算比例:",
+                      leftController: TextEditingController(text: "1"),
+                      leftEditEnable: false,
+                      leftLabel: "*大单位=",
+                      rightController: _sUnitController,
+                      rightInputType: TextInputType.number,
+                      rightLabel: "*小单位"),
+                ])),
+            Offstage(
+              offstage: !btnInfo1,
+              child: Column(
+                children: [
+                  RowButton("商品辅助信息1", appendDown: true, onClick: () {
+                    _showWareInfo1();
+                  }),
+                  Offstage(
+                      offstage: !viewInfo1,
+                      child: Column(children: [
+                        Offstage(
+                            offstage: !btnSortEdit,
+                            child: Column(children: [
+                              RowTwoLabelButtonEdit(
+                                  leftController: _maxSortController,
+                                  leftLabel: "总排序(大):",
+                                  onLeftClick: () {
+                                    _showDialogLetter(context, true);
+                                  },
+                                  leftButtonValue: _maxLetterSort,
+                                  rightController: _minSortController,
+                                  rightLabel: "总排序(小):",
+                                  onRightClick: () {
+                                    _showDialogLetter(context, false);
+                                  },
+                                  rightButtonValue: _minLetterSort),
+                              RowLabelEdit(
+                                  controller: _wareTypeSortController,
+                                  label: "分类排序:")
+                            ])),
+                        RowTwoLabelEdit(
+                            leftController: _maxLsPriceController,
+                            leftLabel: "原价(大):",
+                            leftInputType: TextInputType.number,
+                            rightController: _minLsPriceController,
+                            rightLabel: "原价(小):",
+                            rightInputType: TextInputType.number),
+                        Offstage(
+                          offstage: !btnInPrice,
+                          child: RowTwoLabelEdit(
+                              leftController: _maxInPriceController,
+                              leftLabel: "采购价(大):",
+                              leftInputType: TextInputType.number,
+                              rightController: _minInPriceController,
+                              rightLabel: "采购价(小):",
+                              rightInputType: TextInputType.number),
+                        ),
+                        Offstage(
+                          offstage: !btnPfPrice,
+                          child: RowTwoLabelEdit(
+                              leftController: _maxPfPriceController,
+                              leftLabel: "批发价(大):",
+                              leftInputType: TextInputType.number,
+                              rightController: _minPfPriceController,
+                              rightLabel: "批发价(小):",
+                              rightInputType: TextInputType.number),
+                        ),
+                        Offstage(
+                          offstage: !btnInnerAccPriceDefault,
+                          child: RowLabelEdit(
+                            controller: _innerAccPriceDefaultController,
+                            label: "内部核算价(默认):",
+                            inputType: TextInputType.number,
+                            tip: "为空时默认采购价(大)",
+                          ),
+                        ),
+                        Offstage(
+                          offstage: !btnLowestSalePrice,
+                          child: RowLabelEdit(
+                            controller: _lowestSalePriceController,
+                            label: "最低销售价(大):",
+                            inputType: TextInputType.number,
+                          ),
+                        ),
+                        RowLabelEdit(
+                          controller: _wareFeaturesController,
+                          label: "商品特征:",
+                          hint: "如：红色，白色，蓝色；(每组特征最多4个字)",
+                        ),
+                      ])),
+                ],
+              ),
+            ),
+            Offstage(
+              offstage: !btnInfo2,
+              child: Column(
+                children: [
+                  RowButton("商品辅助信息2", appendDown: true, onClick: () {
+                    _showWareInfo2();
+                  }),
+                  Offstage(
+                    offstage: !viewInfo2,
+                    child: Column(children: [
+                      WareRowLabelEditThree(
+                        leftController: _qualityController,
+                        leftLabel: "保质期:",
+                        leftInputType: TextInputType.number,
+                        leftTwoValue: _quality,
+                        onLeftClick: () {
+                          _showDialogQuality(context);
+                        },
+                        rightController: _qualityWarnController,
+                        rightLabel: "保质期预警:",
+                        rightInputType: TextInputType.number,
+                      ),
+                      RowTwoLabelButton(
+                        onLeftClick: () {
+                          _chooseSup(context);
+                        },
+                        leftLabel: "供应商:",
+                        leftValue: _supName,
+                        onRightClick: () {
+                          _showDialogBrandList();
+                        },
+                        rightLabel: "商品品牌:",
+                        rightValue: _brandText,
+                      ),
+                      RowLabelEdit(
+                          controller: _warnQtyController, label: "预警最低数量:")
+                    ]),
+                  ),
+                ],
+              ),
+            ),
+            Offstage(
+              offstage: !btnCustomerTypePrice,
+              child: RowButton("查看客户类型价", appendDown: true, onClick: () {
+                _showDialogCustomerTypePrice();
+              }),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   MethodChannel _methodChannel = MethodChannel(MethodChannelUtil.ware_edit);
@@ -170,1110 +429,20 @@ class WareEditState extends State<WareEdit> {
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios, size: 15),
-            onPressed: () {
-              Navigator.pop(context);
-              _methodChannel.invokeMethod("closeActivity");
-            },
-          ),
-          title: Text(add ? "新建商品" : "修改商品")),
-      bottomNavigationBar: Container(
-        height: 40,
-        margin: const EdgeInsets.all(10),
-        child: Offstage(
-          offstage: !btnSave,
-          child: RaisedButton(
-              onPressed: () {
-                _save(true);
-              },
-              child: const Text("保存"),
-              textColor: Colors.white,
-              color: Colors.blue),
-        ),
-      ),
-      body: Container(
-        margin: const EdgeInsets.only(left: 10, right: 10),
-        color: Colors.white,
-        child: ListView(
-          children: [
-            Offstage(
-                offstage: !viewInfo,
-                child: Column(children: [
-                  SizedBox(
-                    child: Column(children: [
-                      Container(
-                        alignment: Alignment.center,
-                        child: IconButton(
-                            onPressed: () {
-                              showDialogPic();
-                            },
-                            icon: const Icon(Icons.photo_camera)),
-                      ),
-                      Offstage(
-                        offstage: _picList.isEmpty ? true : false,
-                        child: GridView.builder(
-                            shrinkWrap: true,
-                            scrollDirection: Axis.vertical,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemCount: _picList.length,
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 5,
-                              mainAxisSpacing: 5,
-                              crossAxisSpacing: 5,
-                            ),
-                            itemBuilder: (_, position) => _picItem(position)),
-                      )
-                    ]),
-                  ),
-                  SizedBox(
-                    height: 40,
-                    child: Row(
-                      children: [
-                        Text("商品总类:",
-                            style: TextStyle(color: ColorUtil.GRAY_6)),
-                        Expanded(
-                            child: GestureDetector(
-                          onTap: () {
-                            _showDialogWareIsType(context);
-                          },
-                          child: Text(_isTypeText,
-                              style: TextStyle(color: ColorUtil.BLUE)),
-                        )),
-                        const Icon(Icons.arrow_drop_down)
-                      ],
-                    ),
-                  ),
-                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                  SizedBox(
-                    height: 40,
-                    child: Row(
-                      children: [
-                        Text("商品类别属性:",
-                            style: TextStyle(color: ColorUtil.GRAY_6)),
-                        Radio(
-                            value: "0",
-                            groupValue: _businessType,
-                            onChanged: !add
-                                ? null
-                                : (value) => _changeRadioValue(value)),
-                        Text("实物商品",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_6,
-                                fontSize: FontSizeUtil.MIDDLE)),
-                        Radio(
-                            value: "1",
-                            groupValue: _businessType,
-                            onChanged: !add
-                                ? null
-                                : (value) => _changeRadioValue(value)),
-                        Text("服务商品",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_6,
-                                fontSize: FontSizeUtil.MIDDLE)),
-                      ],
-                    ),
-                  ),
-                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                  SizedBox(
-                    height: 40,
-                    child: Row(
-                      children: [
-                        Text("商品类别:",
-                            style: TextStyle(color: ColorUtil.GRAY_6)),
-                        Expanded(
-                            child: GestureDetector(
-                          onTap: () {
-                            _showDialogWareType(context);
-                          },
-                          child: Text(_wareTypeText,
-                              style: TextStyle(color: ColorUtil.BLUE)),
-                        )),
-                        const Icon(Icons.arrow_drop_down)
-                      ],
-                    ),
-                  ),
-                  Divider(
-                    height: 1,
-                    color: ColorUtil.LINE_GRAY,
-                  ),
-                ])),
-            Container(
-                height: 40,
-                alignment: Alignment.center,
-                child: TextButton(
-                    onPressed: () {
-                      _showWareInfo();
-                    },
-                    child: Text("商品基础信息" + StringUtil.ARROW_DOWN))),
-            SizedBox(
-              child: Row(
-                children: [
-                  Text(
-                    "商品名称:",
-                    style: TextStyle(
-                        color: ColorUtil.GRAY_6, fontSize: FontSizeUtil.MIDDLE),
-                  ),
-                  Expanded(
-                      child: TextField(
-                          controller: _wareNameController,
-                          decoration: const InputDecoration(
-                              isCollapsed:
-                                  true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                              contentPadding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                              hintText: "请输入商品名称",
-                              hintStyle: TextStyle(
-                                  color: Color(0xFF999999), fontSize: 13),
-                              border: OutlineInputBorder(
-                                  borderSide: BorderSide.none)))),
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            SizedBox(
-              child: Row(
-                children: [
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("单位(大):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _maxUnitController,
-                        decoration: const InputDecoration(
-                          isCollapsed:
-                              true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                          hintText: "如箱",
-                          hintStyle:
-                              TextStyle(color: Color(0xFF999999), fontSize: 12),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none),
-                        ),
-                      )),
-                    ],
-                  )),
-                  Expanded(
-                      child: Row(
-                    children: [
-                      Text("单位(小):",
-                          style: TextStyle(
-                              color: ColorUtil.GRAY_6,
-                              fontSize: FontSizeUtil.MIDDLE)),
-                      Expanded(
-                          child: TextField(
-                        controller: _minUnitController,
-                        decoration: const InputDecoration(
-                          isCollapsed:
-                              true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                          contentPadding: EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                          hintText: "如瓶",
-                          hintStyle:
-                              TextStyle(color: Color(0xFf999999), fontSize: 12),
-                          border:
-                              OutlineInputBorder(borderSide: BorderSide.none),
-                        ),
-                      ))
-                    ],
-                  ))
-                ],
-              ),
-            ),
-            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-            Offstage(
-                offstage: !viewInfo,
-                child: Column(children: [
-                  SizedBox(
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: Row(
-                          children: [
-                            Text(
-                              "规格(大):",
-                              style: TextStyle(
-                                  color: ColorUtil.GRAY_6,
-                                  fontSize: FontSizeUtil.MIDDLE),
-                            ),
-                            Expanded(
-                                child: TextField(
-                              controller: _maxWareGgUnitController,
-                              decoration: const InputDecoration(
-                                  isCollapsed:
-                                      true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                                  hintText: "如500ml*6",
-                                  hintStyle: TextStyle(
-                                      color: Color(0xff999999), fontSize: 13),
-                                  border: OutlineInputBorder(
-                                      borderSide: BorderSide.none)),
-                            ))
-                          ],
-                        )),
-                        Expanded(
-                            child: Row(
-                          children: [
-                            Text(
-                              "规格(小):",
-                              style: TextStyle(
-                                  color: ColorUtil.GRAY_6,
-                                  fontSize: FontSizeUtil.MIDDLE),
-                            ),
-                            Expanded(
-                                child: TextField(
-                              controller: _minWareGgUnitController,
-                              decoration: const InputDecoration(
-                                  isCollapsed:
-                                      true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                                  hintText: "如500ml",
-                                  hintStyle: TextStyle(
-                                      color: Color(0xff999999), fontSize: 13),
-                                  border: OutlineInputBorder(
-                                      borderSide: BorderSide.none)),
-                            ))
-                          ],
-                        ))
-                      ],
-                    ),
-                  ),
-                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                  SizedBox(
-                    child: Row(
-                      children: [
-                        Expanded(
-                            child: Row(
-                          children: [
-                            Text(
-                              "条码(大):",
-                              style: TextStyle(
-                                  color: ColorUtil.GRAY_6,
-                                  fontSize: FontSizeUtil.MIDDLE),
-                            ),
-                            Expanded(
-                                child: TextField(
-                              controller: _maxBarCodeController,
-                              maxLines: 3,
-                              minLines: 1,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
-                              ],
-                              decoration: InputDecoration(
-                                  isCollapsed:
-                                      true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                                  hintText: "如(箱码)",
-                                  hintStyle: TextStyle(
-                                      color: ColorUtil.GRAY_9,
-                                      fontSize: FontSizeUtil.MIDDLE),
-                                  border: const OutlineInputBorder(
-                                      borderSide: BorderSide.none)),
-                            )),
-                            SizedBox(
-                              width: 25,
-                              child: GestureDetector(
-                                  onTap: () {
-                                    _methodChannel.invokeMethod(
-                                        "getScan", true);
-                                  },
-                                  child: Image.asset(
-                                      "assets/images/ic_scan_blue.png")),
-                            )
-                          ],
-                        )),
-                        Expanded(
-                            child: Row(
-                          children: [
-                            Text("条码(小):",
-                                style: TextStyle(
-                                    color: ColorUtil.GRAY_6,
-                                    fontSize: FontSizeUtil.MIDDLE)),
-                            Expanded(
-                                child: TextField(
-                              controller: _minBarCodeController,
-                              maxLines: 3,
-                              minLines: 1,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                    RegExp("^[a-z0-9A-Z]+")), //只允许输入字母
-                              ],
-                              decoration: InputDecoration(
-                                  isCollapsed:
-                                      true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                  contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                                  hintText: "如(瓶码)",
-                                  hintStyle: TextStyle(
-                                      color: ColorUtil.GRAY_9,
-                                      fontSize: FontSizeUtil.MIDDLE),
-                                  border: const OutlineInputBorder(
-                                      borderSide: BorderSide.none)),
-                            )),
-                            SizedBox(
-                              width: 25,
-                              child: GestureDetector(
-                                  onTap: () {
-                                    _methodChannel.invokeMethod(
-                                        "getScan", false);
-                                  },
-                                  child: Image.asset(
-                                      "assets/images/ic_scan_blue.png")),
-                            )
-                          ],
-                        ))
-                      ],
-                    ),
-                  ),
-                  Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                  SizedBox(
-                    child: Row(
-                      children: [
-                        Text("大小单位换算比例:",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_6,
-                                fontSize: FontSizeUtil.MIDDLE)),
-                        Text("1",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_3,
-                                fontSize: FontSizeUtil.BIG)),
-                        Text("*大单位=",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_6,
-                                fontSize: FontSizeUtil.MIDDLE)),
-                        Expanded(
-                            child: TextField(
-                          controller: _sUnitController,
-                          keyboardType: TextInputType.number,
-                          decoration: InputDecoration(
-                              isCollapsed:
-                                  true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                              contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                              hintText: "点击输入",
-                              hintStyle: TextStyle(
-                                  color: ColorUtil.GRAY_9,
-                                  fontSize: FontSizeUtil.MIDDLE),
-                              border: const OutlineInputBorder(
-                                  borderSide: BorderSide.none)),
-                        )),
-                        Text("*小单位",
-                            style: TextStyle(
-                                color: ColorUtil.GRAY_6,
-                                fontSize: FontSizeUtil.MIDDLE)),
-                      ],
-                    ),
-                  ),
-                ])),
-            Offstage(
-              offstage: !btnInfo1,
-              child: Column(
-                children: [
-                  Container(
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: TextButton(
-                        onPressed: () {
-                          _showWareInfo1();
-                        },
-                        child: Text("商品辅助信息1" + StringUtil.ARROW_DOWN,
-                            style: TextStyle(
-                                color: ColorUtil.BLUE,
-                                fontSize: FontSizeUtil.BIG))),
-                  ),
-                  Offstage(
-                      offstage: !viewInfo1,
-                      child: Column(children: [
-                        Offstage(
-                            offstage: !btnSortEdit,
-                            child: Column(children: [
-                              SizedBox(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: Row(
-                                      children: [
-                                        Text("总排序(大):",
-                                            style: TextStyle(
-                                                color: ColorUtil.GRAY_6,
-                                                fontSize: FontSizeUtil.MIDDLE)),
-                                        SizedBox(
-                                          width: 50,
-                                          child: TextButton(
-                                              onPressed: () {
-                                                _showDialogLetter(
-                                                    context, true);
-                                              },
-                                              child: Text(
-                                                  _maxLetterSort.isNotEmpty
-                                                      ? _maxLetterSort +
-                                                          StringUtil.ARROW_DOWN
-                                                      : "选择" +
-                                                          StringUtil.ARROW_DOWN,
-                                                  style: TextStyle(
-                                                      color: ColorUtil.BLUE,
-                                                      fontSize: FontSizeUtil
-                                                          .MIDDLE))),
-                                        ),
-                                        Expanded(
-                                            child: TextField(
-                                          controller: _maxSortController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                              isCollapsed:
-                                                  true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical:
-                                                          10), //内容内边距，影响⾼度
-                                              hintText: "输入",
-                                              hintStyle: TextStyle(
-                                                  color: ColorUtil.GRAY_9,
-                                                  fontSize:
-                                                      FontSizeUtil.MIDDLE),
-                                              border: const OutlineInputBorder(
-                                                  borderSide: BorderSide.none)),
-                                        ))
-                                      ],
-                                    )),
-                                    Expanded(
-                                        child: Row(
-                                      children: [
-                                        Text("总排序(小):",
-                                            style: TextStyle(
-                                                color: ColorUtil.GRAY_6,
-                                                fontSize: FontSizeUtil.MIDDLE)),
-                                        SizedBox(
-                                          width: 50,
-                                          child: TextButton(
-                                              onPressed: () {
-                                                _showDialogLetter(
-                                                    context, false);
-                                              },
-                                              child: Text(
-                                                  _minLetterSort.isNotEmpty
-                                                      ? _minLetterSort +
-                                                          StringUtil.ARROW_DOWN
-                                                      : "选择" +
-                                                          StringUtil.ARROW_DOWN,
-                                                  style: TextStyle(
-                                                      color: ColorUtil.BLUE,
-                                                      fontSize: FontSizeUtil
-                                                          .MIDDLE))),
-                                        ),
-                                        Expanded(
-                                            child: TextField(
-                                          controller: _minSortController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                              isCollapsed:
-                                                  true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical:
-                                                          10), //内容内边距，影响⾼度
-                                              hintText: "输入",
-                                              hintStyle: TextStyle(
-                                                  color: ColorUtil.GRAY_9,
-                                                  fontSize:
-                                                      FontSizeUtil.MIDDLE),
-                                              border: const OutlineInputBorder(
-                                                  borderSide: BorderSide.none)),
-                                        ))
-                                      ],
-                                    )),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                        child: Row(
-                                      children: [
-                                        Text("分类排序:",
-                                            style: TextStyle(
-                                                color: ColorUtil.GRAY_6,
-                                                fontSize: FontSizeUtil.MIDDLE)),
-                                        Expanded(
-                                            child: TextField(
-                                          controller: _wareTypeSortController,
-                                          keyboardType: TextInputType.number,
-                                          decoration: InputDecoration(
-                                              isCollapsed:
-                                                  true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                              contentPadding:
-                                                  const EdgeInsets.symmetric(
-                                                      horizontal: 8,
-                                                      vertical:
-                                                          10), //内容内边距，影响⾼度
-                                              hintText: "点击输入",
-                                              hintStyle: TextStyle(
-                                                  color: ColorUtil.GRAY_9,
-                                                  fontSize:
-                                                      FontSizeUtil.MIDDLE),
-                                              border: const OutlineInputBorder(
-                                                  borderSide: BorderSide.none)),
-                                        ))
-                                      ],
-                                    ))
-                                  ],
-                                ),
-                              ),
-                              Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                            ])),
-                        SizedBox(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: Row(
-                                children: [
-                                  Text("原价(大):",
-                                      style: TextStyle(
-                                          color: ColorUtil.GRAY_6,
-                                          fontSize: FontSizeUtil.MIDDLE)),
-                                  Expanded(
-                                      child: TextField(
-                                    controller: _maxLsPriceController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                        isCollapsed:
-                                            true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 10), //内容内边距，影响⾼度
-                                        hintText: "点击输入",
-                                        hintStyle: TextStyle(
-                                            color: ColorUtil.GRAY_9,
-                                            fontSize: FontSizeUtil.MIDDLE),
-                                        border: const OutlineInputBorder(
-                                            borderSide: BorderSide.none)),
-                                  ))
-                                ],
-                              )),
-                              Expanded(
-                                  child: Row(
-                                children: [
-                                  Text("原价(小):",
-                                      style: TextStyle(
-                                          color: ColorUtil.GRAY_6,
-                                          fontSize: FontSizeUtil.MIDDLE)),
-                                  Expanded(
-                                      child: TextField(
-                                    controller: _minLsPriceController,
-                                    keyboardType: TextInputType.number,
-                                    decoration: InputDecoration(
-                                        isCollapsed:
-                                            true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 10), //内容内边距，影响⾼度
-                                        hintText: "点击输入",
-                                        hintStyle: TextStyle(
-                                            color: ColorUtil.GRAY_9,
-                                            fontSize: FontSizeUtil.MIDDLE),
-                                        border: const OutlineInputBorder(
-                                            borderSide: BorderSide.none)),
-                                  ))
-                                ],
-                              ))
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                        Offstage(
-                          offstage: !btnInPrice,
-                          child: Column(children: [
-                            SizedBox(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("采购价(大):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller: _maxInPriceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      ))
-                                    ],
-                                  )),
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("采购价(小):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller: _minInPriceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      ))
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                          ]),
-                        ),
-                        Offstage(
-                          offstage: !btnPfPrice,
-                          child: Column(children: [
-                            SizedBox(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("批发价(大):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller: _maxPfPriceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      ))
-                                    ],
-                                  )),
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("批发价(小):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller: _minPfPriceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      ))
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                          ]),
-                        ),
-                        Offstage(
-                          offstage: !btnInnerAccPriceDefault,
-                          child: Column(children: [
-                            SizedBox(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("内部核算价(默认):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller:
-                                            _innerAccPriceDefaultController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      )),
-                                      Text("为空时默认采购价(大)",
-                                          style: TextStyle(
-                                              color: ColorUtil.RED,
-                                              fontSize: FontSizeUtil.TIP_RED))
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                          ]),
-                        ),
-                        Offstage(
-                          offstage: !btnLowestSalePrice,
-                          child: Column(children: [
-                            SizedBox(
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                      child: Row(
-                                    children: [
-                                      Text("最低销售价(大):",
-                                          style: TextStyle(
-                                              color: ColorUtil.GRAY_6,
-                                              fontSize: FontSizeUtil.MIDDLE)),
-                                      Expanded(
-                                          child: TextField(
-                                        controller: _lowestSalePriceController,
-                                        keyboardType: TextInputType.number,
-                                        decoration: InputDecoration(
-                                            isCollapsed:
-                                                true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                            contentPadding:
-                                                const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 10), //内容内边距，影响⾼度
-                                            hintText: "点击输入",
-                                            hintStyle: TextStyle(
-                                                color: ColorUtil.GRAY_9,
-                                                fontSize: FontSizeUtil.MIDDLE),
-                                            border: const OutlineInputBorder(
-                                                borderSide: BorderSide.none)),
-                                      ))
-                                    ],
-                                  ))
-                                ],
-                              ),
-                            ),
-                            Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                          ]),
-                        ),
-                        SizedBox(
-                          child: Row(
-                            children: [
-                              Expanded(
-                                  child: Row(
-                                children: [
-                                  Text("商品特征:",
-                                      style: TextStyle(
-                                          color: ColorUtil.GRAY_6,
-                                          fontSize: FontSizeUtil.MIDDLE)),
-                                  Expanded(
-                                      child: TextField(
-                                    controller: _wareFeaturesController,
-                                    decoration: InputDecoration(
-                                        isCollapsed:
-                                            true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 10), //内容内边距，影响⾼度
-                                        hintText: "如：红色，白色，蓝色；(每组特征最多4个字)",
-                                        hintStyle: TextStyle(
-                                            color: ColorUtil.GRAY_9,
-                                            fontSize: FontSizeUtil.MIDDLE),
-                                        border: const OutlineInputBorder(
-                                            borderSide: BorderSide.none)),
-                                  ))
-                                ],
-                              ))
-                            ],
-                          ),
-                        ),
-                        Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                      ])),
-                ],
-              ),
-            ),
-            Offstage(
-              offstage: !btnInfo2,
-              child: Column(
-                children: [
-                  Container(
-                    height: 40,
-                    alignment: Alignment.center,
-                    child: TextButton(
-                        onPressed: () {
-                          _showWareInfo2();
-                        },
-                        child: Text("商品辅助信息2" + StringUtil.ARROW_DOWN,
-                            style: TextStyle(
-                                color: ColorUtil.BLUE,
-                                fontSize: FontSizeUtil.BIG))),
-                  ),
-                  Offstage(
-                    offstage: !viewInfo2,
-                    child: Column(children: [
-                      SizedBox(
-                        child: Row(
-                          children: [
-                            Expanded(
-                                child: Row(
-                              children: [
-                                Text("保质期:",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE)),
-                                Expanded(
-                                    child: TextField(
-                                  controller: _qualityController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp("[0-9]"))
-                                  ],
-                                  decoration: InputDecoration(
-                                      isCollapsed:
-                                          true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 10), //内容内边距，影响⾼度
-                                      hintText: "点击输入",
-                                      hintStyle: TextStyle(
-                                          color: ColorUtil.GRAY_9,
-                                          fontSize: FontSizeUtil.MIDDLE),
-                                      border: const OutlineInputBorder(
-                                          borderSide: BorderSide.none)),
-                                )),
-                                TextButton(
-                                  onPressed: () {
-                                    _showDialogQuality(context);
-                                  },
-                                  child: Text(
-                                    _quality + StringUtil.ARROW_DOWN,
-                                    style: TextStyle(
-                                        color: ColorUtil.BLUE,
-                                        fontSize: FontSizeUtil.MIDDLE),
-                                  ),
-                                )
-                              ],
-                            )),
-                            Expanded(
-                                child: Row(
-                              children: [
-                                Text("保质期预警:",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE)),
-                                Expanded(
-                                    child: TextField(
-                                  controller: _qualityWarnController,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.allow(
-                                        RegExp("[0-9]"))
-                                  ],
-                                  decoration: InputDecoration(
-                                      isCollapsed:
-                                          true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 10), //内容内边距，影响⾼度
-                                      hintText: "点击输入",
-                                      hintStyle: TextStyle(
-                                          color: ColorUtil.GRAY_9,
-                                          fontSize: FontSizeUtil.MIDDLE),
-                                      border: const OutlineInputBorder(
-                                          borderSide: BorderSide.none)),
-                                )),
-                                Text("天",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE))
-                              ],
-                            ))
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                      SizedBox(
-                        child: Row(
-                          children: [
-                            Expanded(
-                                child: Row(
-                              children: [
-                                Text("供应商:",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE)),
-                                TextButton(
-                                    onPressed: () {
-                                      _chooseSup(context);
-                                    },
-                                    child: Text(
-                                        _supName.isNotEmpty
-                                            ? _supName + StringUtil.ARROW_DOWN
-                                            : "选择" + StringUtil.ARROW_DOWN,
-                                        style: TextStyle(
-                                            color: ColorUtil.BLUE,
-                                            fontSize: FontSizeUtil.MIDDLE)))
-                              ],
-                            )),
-                            Expanded(
-                                child: Row(
-                              children: [
-                                Text("商品品牌:",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE)),
-                                TextButton(
-                                    onPressed: () {
-                                      _showDialogBrandList();
-                                    },
-                                    child: Text(
-                                        _brandText.isNotEmpty
-                                            ? _brandText + StringUtil.ARROW_DOWN
-                                            : "选择" + StringUtil.ARROW_DOWN,
-                                        style: TextStyle(
-                                            color: ColorUtil.BLUE,
-                                            fontSize: FontSizeUtil.MIDDLE)))
-                              ],
-                            )),
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                      SizedBox(
-                        child: Row(
-                          children: [
-                            Expanded(
-                                child: Row(
-                              children: [
-                                Text("预警最低数量:",
-                                    style: TextStyle(
-                                        color: ColorUtil.GRAY_6,
-                                        fontSize: FontSizeUtil.MIDDLE)),
-                                Expanded(
-                                    child: TextField(
-                                  controller: _warnQtyController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                      isCollapsed:
-                                          true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 10), //内容内边距，影响⾼度
-                                      hintText: "点击输入",
-                                      hintStyle: TextStyle(
-                                          color: ColorUtil.GRAY_9,
-                                          fontSize: FontSizeUtil.MIDDLE),
-                                      border: const OutlineInputBorder(
-                                          borderSide: BorderSide.none)),
-                                ))
-                              ],
-                            ))
-                          ],
-                        ),
-                      ),
-                      Divider(height: 1, color: ColorUtil.LINE_GRAY),
-                    ]),
-                  ),
-                ],
-              ),
-            ),
-            Offstage(
-              offstage: !btnCustomerTypePrice,
-              child: Container(
-                height: 40,
-                alignment: Alignment.center,
-                child: TextButton(
-                    onPressed: () {
-                      _showDialogCustomerTypePrice();
-                    },
-                    child: Text("查看客户类型价" + StringUtil.ARROW_DOWN,
-                        style: TextStyle(
-                            color: ColorUtil.BLUE,
-                            fontSize: FontSizeUtil.BIG))),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   /**
    * 选择供应商
    */
   void _chooseSup(BuildContext context) {
+    FocusManager.instance.primaryFocus?.unfocus();
     Navigator.of(context).pushNamed("choose_customer").then((value) {
-    SupBean sup = SupBean.fromJson(json.decode(value.toString()));
-    LogUtil.d(sup.supName);
-    setState(() {
-      _supId = sup.supId;
-      _supType = sup.supType;
-      _supName = sup.supName!;
+      SupBean sup = SupBean.fromJson(json.decode(value.toString()));
+      LogUtil.d(sup.supName);
+      setState(() {
+        _supId = sup.supId;
+        _supType = sup.supType;
+        _supName = sup.supName!;
+      });
     });
-  });
   }
 
   String _businessType = "0";
@@ -1555,17 +724,17 @@ class WareEditState extends State<WareEdit> {
     });
   }
 
-  void showDialogPic(){
+  void showDialogPic() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           return BottomDialog(
-            list: [ "拍照", "相册"],
+            list: ["拍照", "相册"],
             onChanged: (int index) {
               LogUtil.d(index);
-              if( 0 == index){
+              if (0 == index) {
                 _imagePickerByCamera();
-              }else{
+              } else {
                 _imagePickerByGallery();
               }
             },
@@ -1578,6 +747,7 @@ class WareEditState extends State<WareEdit> {
     final XFile? photo = await _picker.pickImage(source: ImageSource.camera);
     uploadPic(photo!.path);
   }
+
   void _imagePickerByGallery() async {
     ImagePicker _picker = ImagePicker();
     final XFile? photo = await _picker.pickImage(source: ImageSource.gallery);
@@ -1596,7 +766,8 @@ class WareEditState extends State<WareEdit> {
         child: RepaintBoundary(
           child: ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
-            child: Image.network(UrlManager.ROOT + UrlManager.ROOT_UPLOAD + pic.pic!,
+            child: Image.network(
+                UrlManager.ROOT + UrlManager.ROOT_UPLOAD + pic.pic!,
                 fit: BoxFit.cover),
           ),
         ),
@@ -1646,8 +817,10 @@ class WareEditState extends State<WareEdit> {
     map["path"] = "ware";
     map["file"] = await MultipartFile.fromFile(filePath);
     var data = FormData.fromMap(map);
-    var response = await dio.post(UrlManager.ROOT + UrlManager.upload_pic_single,
-        data: data, options: Options(headers: {"token": ContainsUtil.token}));
+    var response = await dio.post(
+        UrlManager.ROOT + UrlManager.upload_pic_single,
+        data: data,
+        options: Options(headers: {"token": ContainsUtil.token}));
     LogUtil.d(response);
     PicResult picResult = PicResult.fromJson(json.decode(response.toString()));
     setState(() {
@@ -1946,7 +1119,7 @@ class WareEditState extends State<WareEdit> {
     LoadingDialogUtil.dismiss();
     LogUtil.d(response);
     CustomerTypePriceResult result =
-    CustomerTypePriceResult.fromJson(json.decode(response.toString()));
+        CustomerTypePriceResult.fromJson(json.decode(response.toString()));
     if (result.state!) {
       _customerTypePriceList = [];
       _customerTypePriceList.addAll(result.data!);
@@ -2032,7 +1205,7 @@ class WareEditState extends State<WareEdit> {
                                   ),
                                 ),
                                 CustomerTypePriceEdit(
-                                  enable: btnUpdateCustomerTypePrice,
+                                    enable: btnUpdateCustomerTypePrice,
                                     max: true,
                                     wareId: wareId!,
                                     customerTypeId:
@@ -2046,7 +1219,7 @@ class WareEditState extends State<WareEdit> {
                                             .salePrice
                                             .toString()),
                                 CustomerTypePriceEdit(
-                                  enable: btnUpdateCustomerTypePrice,
+                                    enable: btnUpdateCustomerTypePrice,
                                     max: false,
                                     wareId: wareId!,
                                     customerTypeId:
@@ -2129,11 +1302,9 @@ class CustomerTypePriceEditState extends State<CustomerTypePriceEdit>
           enabled: widget.enable,
           controller: _controller,
           focusNode: _focusNode,
-          style: TextStyle(color: widget.enable? ColorUtil.GRAY_3: ColorUtil.GRAY_9),
-          inputFormatters: [
-            FilteringTextInputFormatter.allow(
-                RegExp("[0-9]"))
-          ],
+          style: TextStyle(
+              color: widget.enable ? ColorUtil.GRAY_3 : ColorUtil.GRAY_9),
+          inputFormatters: [FilteringTextInputFormatter.allow(RegExp("[0-9]"))],
           decoration: const InputDecoration(
             isCollapsed: true,
             contentPadding: EdgeInsets.all(8),
