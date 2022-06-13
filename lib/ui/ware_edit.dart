@@ -379,24 +379,6 @@ class WareEditState extends State<WareEdit> {
     }
   }
 
-  /// 原生 调用 Flutter的结果回调
-  Future<String> _methodChannelHandler(MethodCall call) async {
-    switch (call.method) {
-      case "setScan":
-        setState(() {
-          Map<String, dynamic> map = Map<String, dynamic>.from(call.arguments);
-          bool max = map["max"];
-          if (max) {
-            _maxBarCodeController.text = map["barcode"];
-          } else {
-            _minBarCodeController.text = map["barcode"];
-          }
-        });
-        break;
-    }
-    return "";
-  }
-
   Future<void> queryDetail() async {
     EasyLoading.show(status: "加载中...");
     Map<String, dynamic>? params = {"wareId": wareId};
