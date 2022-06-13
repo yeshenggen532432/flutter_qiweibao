@@ -1,5 +1,5 @@
 class ContainsUtil{
-  static bool release = true;
+  static bool release = false;
 
-  static String token = "dcc6a6e0d7be88990d49c18d84fdd02a";
+  static String token = "304e8f0fe3c2cddba56614327d849c3c";
 }

@@ -27,11 +27,24 @@ class BaseTextField extends StatefulWidget {
 }
 
 class BaseTextFieldState extends State<BaseTextField> {
+  FocusNode _focusNode = FocusNode();
+  bool hasFocus = false;
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.addListener(() {
+      setState(() {
+        hasFocus = _focusNode.hasFocus;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
         child: TextField(
       controller: widget.controller,
+      focusNode: _focusNode,
       keyboardType: widget.inputType,
       maxLines: 3,
       minLines: 1,
@@ -45,30 +58,32 @@ class BaseTextFieldState extends State<BaseTextField> {
         });
       },
       decoration: InputDecoration(
-        isCollapsed: true,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 5, vertical: 13),
-        hintText: widget.hint,
-        hintStyle: TextStyle(
-            color: ColorUtil.hint_gray, fontSize: FontSizeUtil.MIDDLE),
-        border: const OutlineInputBorder(borderSide: BorderSide.none),
-        //文本框的尾部图标
-//            suffixIcon: widget.controller.text.isNotEmpty && widget.hasClear == true
-////                ? IconButton(
-////              color: Colors.red,
-////              iconSize: 10,
-////                    padding: const EdgeInsets.all(2),
-////                    onPressed: () {
-////                      setState(() {
-////                        widget.controller.clear();
-////                      });
-////                    },
-////                    icon: const Icon(
-////                      Icons.cancel,
-////                      color: Colors.grey,
-////                      size: 20,
-////                    ))
-////                : null
-      ),
+          isCollapsed: true,
+          contentPadding:
+              const EdgeInsets.symmetric(horizontal: 5, vertical: 13),
+          hintText: widget.hint,
+          hintStyle: TextStyle(
+              color: ColorUtil.hint_gray, fontSize: FontSizeUtil.MIDDLE),
+          border: const OutlineInputBorder(borderSide: BorderSide.none),
+//        文本框的尾部图标
+          suffixIconConstraints:
+              const BoxConstraints.expand(width: 20, height: 40),
+          suffixIcon: widget.controller.text.isNotEmpty &&
+                  widget.hasClear == true &&
+                  hasFocus
+              ? IconButton(
+                  padding: const EdgeInsets.all(0),
+                  onPressed: () {
+                    setState(() {
+                      widget.controller.clear();
+                    });
+                  },
+                  icon: const Icon(
+                    Icons.cancel,
+                    color: Colors.grey,
+                    size: 20,
+                  ))
+              : null),
     ));
   }
 }

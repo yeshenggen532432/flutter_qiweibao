@@ -30,6 +30,45 @@ class RowButton extends StatelessWidget {
 }
 
 ///标签+编辑框
+class LabelEdit extends StatelessWidget {
+  TextEditingController controller;
+  String label;
+  String? hint;
+  TextInputType? inputType;
+  String? tip;
+  LabelEdit(
+      {Key? key,
+        required this.controller,
+        required this.label,
+        this.hint = "请输入",
+        this.inputType = TextInputType.text,
+        this.tip = ""})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+        child: Row(
+          children: [
+            Text(label,
+                style: TextStyle(
+                    color: ColorUtil.GRAY_6, fontSize: FontSizeUtil.MIDDLE)),
+            Expanded(
+              child: BaseTextField(
+                  controller: controller, inputType: inputType, hint: hint),
+            ),
+            Offstage(
+              offstage: tip!.isNotEmpty ? false : true,
+              child: Text("为空时默认采购价(大)",
+                  style: TextStyle(
+                      color: ColorUtil.RED, fontSize: FontSizeUtil.TIP_RED)),
+            ),
+          ],
+        ));
+  }
+}
+
+///标签+编辑框
 class RowLabelEdit extends StatelessWidget {
   TextEditingController controller;
   String label;
@@ -52,21 +91,12 @@ class RowLabelEdit extends StatelessWidget {
         SizedBox(
           child: Row(
             children: [
-              Text(
-                label,
-                style: TextStyle(
-                    color: ColorUtil.GRAY_6, fontSize: FontSizeUtil.MIDDLE),
-              ),
-              Expanded(
-                child: BaseTextField(
-                    controller: controller, inputType: inputType, hint: hint),
-              ),
-              Offstage(
-                offstage: tip!.isNotEmpty ? false : true,
-                child: Text("为空时默认采购价(大)",
-                    style: TextStyle(
-                        color: ColorUtil.RED, fontSize: FontSizeUtil.TIP_RED)),
-              ),
+              LabelEdit(
+                  controller: controller,
+                  label: label,
+                  hint: hint,
+                  inputType: inputType,
+                  tip: tip,),
             ],
           ),
         ),
@@ -148,39 +178,20 @@ class RowTwoLabelEdit extends StatelessWidget {
         SizedBox(
           child: Row(
             children: [
-              Expanded(
-                  child: Row(
-                children: [
-                  Text(leftLabel,
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                  Expanded(
-                    child: BaseTextField(
-                        controller: leftController,
-                        inputType: leftInputType,
-                        hint: leftHint),
-                  ),
-                ],
-              )),
-              Expanded(
-                  child: Row(
-                children: [
-                  Text(rightLabel,
-                      style: TextStyle(
-                          color: ColorUtil.GRAY_6,
-                          fontSize: FontSizeUtil.MIDDLE)),
-                  Expanded(
-                      child: BaseTextField(
-                          controller: rightController,
-                          inputType: rightInputType,
-                          hint: rightHint))
-                ],
-              ))
+              LabelEdit(
+                  controller: leftController,
+                  label: leftLabel,
+                  hint: leftHint,
+                  inputType: leftInputType),
+              LabelEdit(
+                  controller: rightController,
+                  label: rightLabel,
+                  hint: rightHint,
+                  inputType: rightInputType),
             ],
           ),
         ),
-        Divider(height: 1, color: ColorUtil.LINE_GRAY),
+        Line(),
       ],
     );
   }
@@ -416,7 +427,8 @@ class RowTwoLabelEditIcon extends StatelessWidget {
                       child: BaseTextField(
                           controller: leftController,
                           inputType: leftInputType,
-                          hint: leftHint)),
+                          hint: leftHint,
+                          hasClear: false)),
                   SizedBox(
                     width: 25,
                     child: GestureDetector(
@@ -438,7 +450,8 @@ class RowTwoLabelEditIcon extends StatelessWidget {
                       child: BaseTextField(
                           controller: rightController,
                           inputType: rightInputType,
-                          hint: rightHint)),
+                          hint: rightHint,
+                          hasClear: false)),
                   SizedBox(
                     width: 25,
                     child: GestureDetector(
