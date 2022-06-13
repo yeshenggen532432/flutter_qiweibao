@@ -19,6 +19,7 @@ import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/template/base_template.dart';
 import 'package:flutterqiweibao/template/row_template.dart';
+import 'package:flutterqiweibao/template/text_field_template.dart';
 import 'package:flutterqiweibao/template/ware/ware_edit_template.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
@@ -134,8 +135,8 @@ class WareEditState extends State<WareEdit> {
             }),
             RowLabelEdit(
                 controller: _wareNameController,
-                label: "商品名称:",
-                hint: "请输入商品名称"),
+                label: "商品名称2:",
+                hint: "请输入商品名称2"),
             RowTwoLabelEdit(
               leftController: _maxUnitController,
               leftLabel: "单位(大):",

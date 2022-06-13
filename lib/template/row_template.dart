@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutterqiweibao/template/base_template.dart';
-import 'package:flutterqiweibao/utils/Input_util.dart';
+import 'package:flutterqiweibao/template/text_field_template.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/font_size_util.dart';
 import 'package:flutterqiweibao/utils/string_util.dart';
@@ -58,21 +58,9 @@ class RowLabelEdit extends StatelessWidget {
                     color: ColorUtil.GRAY_6, fontSize: FontSizeUtil.MIDDLE),
               ),
               Expanded(
-                  child: TextField(
-                      controller: controller,
-                      keyboardType: inputType,
-                      inputFormatters: InputUtil.getInputFormatList(inputType),
-                      decoration: InputDecoration(
-                          isCollapsed:
-                              true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                          contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                          hintText: hint,
-                          hintStyle: TextStyle(
-                              color: ColorUtil.hint_gray,
-                              fontSize: FontSizeUtil.MIDDLE),
-                          border: const OutlineInputBorder(
-                              borderSide: BorderSide.none)))),
+                child: BaseTextField(
+                    controller: controller, inputType: inputType, hint: hint),
+              ),
               Offstage(
                 offstage: tip!.isNotEmpty ? false : true,
                 child: Text("为空时默认采购价(大)",
@@ -93,6 +81,7 @@ class RowLabelMenu extends StatelessWidget {
   String label;
   VoidCallback onClick;
   String menuValue;
+
   RowLabelMenu({
     Key? key,
     required this.label,
@@ -167,23 +156,11 @@ class RowTwoLabelEdit extends StatelessWidget {
                           color: ColorUtil.GRAY_6,
                           fontSize: FontSizeUtil.MIDDLE)),
                   Expanded(
-                      child: TextField(
-                    controller: leftController,
-                    keyboardType: leftInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(leftInputType),
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                      hintText: leftHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  )),
+                    child: BaseTextField(
+                        controller: leftController,
+                        inputType: leftInputType,
+                        hint: leftHint),
+                  ),
                 ],
               )),
               Expanded(
@@ -194,23 +171,10 @@ class RowTwoLabelEdit extends StatelessWidget {
                           color: ColorUtil.GRAY_6,
                           fontSize: FontSizeUtil.MIDDLE)),
                   Expanded(
-                      child: TextField(
-                    controller: rightController,
-                    keyboardType: rightInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(rightInputType),
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                      hintText: rightHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ))
+                      child: BaseTextField(
+                          controller: rightController,
+                          inputType: rightInputType,
+                          hint: rightHint))
                 ],
               ))
             ],
@@ -359,23 +323,10 @@ class RowTwoLabelButtonEdit extends StatelessWidget {
                                 fontSize: FontSizeUtil.MIDDLE))),
                   ),
                   Expanded(
-                      child: TextField(
-                    controller: leftController,
-                    keyboardType: leftInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(leftInputType),
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 10), //内容内边距，影响⾼度
-                      hintText: leftHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  )),
+                      child: BaseTextField(
+                          controller: leftController,
+                          inputType: leftInputType,
+                          hint: leftHint)),
                 ],
               )),
               Expanded(
@@ -402,23 +353,10 @@ class RowTwoLabelButtonEdit extends StatelessWidget {
                                 fontSize: FontSizeUtil.MIDDLE))),
                   ),
                   Expanded(
-                      child: TextField(
-                    controller: rightController,
-                    keyboardType: rightInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(rightInputType),
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding:
-                          const EdgeInsets.symmetric(vertical: 10), //内容内边距，影响⾼度
-                      hintText: rightHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  ))
+                      child: BaseTextField(
+                          controller: rightController,
+                          inputType: rightInputType,
+                          hint: rightHint))
                 ],
               ))
             ],
@@ -475,25 +413,10 @@ class RowTwoLabelEditIcon extends StatelessWidget {
                           color: ColorUtil.GRAY_6,
                           fontSize: FontSizeUtil.MIDDLE)),
                   Expanded(
-                      child: TextField(
-                    controller: leftController,
-                    keyboardType: leftInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(leftInputType),
-                    maxLines: 3,
-                    minLines: 1,
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                      hintText: leftHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  )),
+                      child: BaseTextField(
+                          controller: leftController,
+                          inputType: leftInputType,
+                          hint: leftHint)),
                   SizedBox(
                     width: 25,
                     child: GestureDetector(
@@ -512,25 +435,10 @@ class RowTwoLabelEditIcon extends StatelessWidget {
                           color: ColorUtil.GRAY_6,
                           fontSize: FontSizeUtil.MIDDLE)),
                   Expanded(
-                      child: TextField(
-                    controller: rightController,
-                    keyboardType: rightInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(rightInputType),
-                    maxLines: 3,
-                    minLines: 1,
-                    decoration: InputDecoration(
-                      isCollapsed: true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                      contentPadding: const EdgeInsets.symmetric(
-                          horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                      hintText: rightHint,
-                      hintStyle: TextStyle(
-                          color: ColorUtil.hint_gray,
-                          fontSize: FontSizeUtil.MIDDLE),
-                      border:
-                          const OutlineInputBorder(borderSide: BorderSide.none),
-                    ),
-                  )),
+                      child: BaseTextField(
+                          controller: rightController,
+                          inputType: rightInputType,
+                          hint: rightHint)),
                   SizedBox(
                     width: 25,
                     child: GestureDetector(
@@ -647,24 +555,12 @@ class RowLabelTwoEditLabel extends StatelessWidget {
                   child: Row(
                 children: [
                   Expanded(
-                      child: TextField(
-                    controller: leftController,
-                    keyboardType: leftInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(leftInputType),
-                    enabled: leftEditEnable,
-                    decoration: InputDecoration(
-                        isCollapsed:
-                            true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                        hintText: "点击输入",
-                        hintStyle: TextStyle(
-                            color: ColorUtil.GRAY_9,
-                            fontSize: FontSizeUtil.MIDDLE),
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none)),
-                  )),
+                      child: BaseTextField(
+                          controller: leftController,
+                          inputType: leftInputType,
+                          hint: leftHint,
+                          enable: leftEditEnable,
+                          hasClear: false)),
                   Text(leftLabel,
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
@@ -675,23 +571,11 @@ class RowLabelTwoEditLabel extends StatelessWidget {
                   child: Row(
                 children: [
                   Expanded(
-                      child: TextField(
-                    controller: rightController,
-                    keyboardType: rightInputType,
-                    inputFormatters:
-                        InputUtil.getInputFormatList(rightInputType),
-                    decoration: InputDecoration(
-                        isCollapsed:
-                            true, //重点，相当于⾼度包裹的意思，必须设置为true，不然有默认奇妙的最⼩⾼度
-                        contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 8, vertical: 10), //内容内边距，影响⾼度
-                        hintText: "点击输入",
-                        hintStyle: TextStyle(
-                            color: ColorUtil.GRAY_9,
-                            fontSize: FontSizeUtil.MIDDLE),
-                        border: const OutlineInputBorder(
-                            borderSide: BorderSide.none)),
-                  )),
+                      child: BaseTextField(
+                          controller: rightController,
+                          inputType: rightInputType,
+                          hint: rightHint,
+                          hasClear: false)),
                   Text(rightLabel,
                       style: TextStyle(
                           color: ColorUtil.GRAY_6,
