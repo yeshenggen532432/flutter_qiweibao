@@ -19,7 +19,6 @@ import 'package:flutterqiweibao/model/ware/ware_pic.dart';
 import 'package:flutterqiweibao/model/ware/ware_result.dart';
 import 'package:flutterqiweibao/template/base_template.dart';
 import 'package:flutterqiweibao/template/row_template.dart';
-import 'package:flutterqiweibao/template/text_field_template.dart';
 import 'package:flutterqiweibao/template/ware/ware_edit_template.dart';
 import 'package:flutterqiweibao/utils/color_util.dart';
 import 'package:flutterqiweibao/utils/contains_util.dart';
@@ -28,7 +27,7 @@ import 'package:flutterqiweibao/utils/http/url_manager.dart';
 import 'package:flutterqiweibao/utils/loading_dialog_util.dart';
 import 'package:flutterqiweibao/utils/log_util.dart';
 import 'package:flutterqiweibao/utils/menu_code_util.dart';
-import 'package:flutterqiweibao/utils/method_channel_util.dart';
+import 'package:flutterqiweibao/utils/channel_util.dart';
 import 'package:flutterqiweibao/utils/quality_unit_util.dart';
 import 'package:flutterqiweibao/utils/toast_util.dart';
 import 'package:flutterqiweibao/widget/dialog/bottom_dialog.dart';
@@ -52,7 +51,8 @@ class WareEditState extends State<WareEdit> {
 
   @override
   void initState() {
-    getIntent();
+    initMethodChannel();
+    initEventChannel();
     super.initState();
   }
 
@@ -316,25 +316,67 @@ class WareEditState extends State<WareEdit> {
     );
   }
 
-  MethodChannel _methodChannel = MethodChannel(MethodChannelUtil.ware_edit);
-  getIntent() async {
+  MethodChannel _methodChannel = MethodChannel(ChannelUtil.method_channel_ware_edit);
+  initMethodChannel(){
     if (ContainsUtil.release) {
-      _methodChannel.setMethodCallHandler(_methodChannelHandler);
-      var map = await _methodChannel.invokeMethod("getIntent");
-      WareEditIntent intent = WareEditIntent.fromJson(json.decode(map));
-      setState(() {
-        add = intent.add!;
-        wareId = intent.wareId;
-        ContainsUtil.token = intent.token!;
-        UrlManager.ROOT = intent.baseUrl!;
+//      _methodChannel.setMethodCallHandler(_methodChannelHandler);
+      _methodChannel.setMethodCallHandler((call) async{
+        switch (call.method) {
+          case "setScan":
+            setState(() {
+              Map<String, dynamic> map = Map<String, dynamic>.from(call.arguments);
+              bool max = map["max"];
+              if (max) {
+                _maxBarCodeController.text = map["barcode"];
+              } else {
+                _minBarCodeController.text = map["barcode"];
+              }
+            });
+            break;
+        }
       });
+//      var map = await _methodChannel.invokeMethod("getIntent");
+//      WareEditIntent intent = WareEditIntent.fromJson(json.decode(map));
+//      setState(() {
+//        add = intent.add!;
+//        wareId = intent.wareId;
+//        ContainsUtil.token = intent.token!;
+//        UrlManager.ROOT = intent.baseUrl!;
+//      });
     }
-    setState(() {
+//    setState(() {
+//      getMenuList();
+//      if (!add) {
+//        queryDetail();
+//      }
+//    });
+  }
+
+  EventChannel _eventChannel = EventChannel(ChannelUtil.event_channel_ware_edit);
+  void initEventChannel() {
+    if(ContainsUtil.release){
+      _eventChannel.receiveBroadcastStream().listen((event) async {
+        setState(() {
+          WareEditIntent intent =
+          WareEditIntent.fromJson(Map<String, dynamic>.from(event));
+          setState(() {
+            add = intent.add!;
+            wareId = intent.wareId;
+            ContainsUtil.token = intent.token!;
+            UrlManager.ROOT = intent.baseUrl!;
+            getMenuList();
+            if (!add) {
+              queryDetail();
+            }
+          });
+        });
+      });
+    }else{
       getMenuList();
       if (!add) {
         queryDetail();
       }
-    });
+    }
   }
 
   /// 原生 调用 Flutter的结果回调
@@ -342,8 +384,7 @@ class WareEditState extends State<WareEdit> {
     switch (call.method) {
       case "setScan":
         setState(() {
-          String arguments = call.arguments.toString();
-          Map<String, dynamic> map = json.decode(arguments);
+          Map<String, dynamic> map = Map<String, dynamic>.from(call.arguments);
           bool max = map["max"];
           if (max) {
             _maxBarCodeController.text = map["barcode"];
